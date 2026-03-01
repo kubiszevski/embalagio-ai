@@ -2,7 +2,7 @@
 
 Este projeto é um **Portal de Atendimento Inteligente** desenvolvido para simular a automação do WhatsApp de uma franquia (Embalagio). Ele utiliza Inteligência Artificial para interpretar mensagens não-estruturadas de clientes, extrair dados relevantes de pedidos e cadastrá-los automaticamente em um CRM, além de fornecer uma resposta humanizada em tempo real.
 
-
+![Diagrama de Arquitetura Técnica n8n](workflow_n8n.png)
 
 ## 🎯 O Problema que este projeto resolve
 Em operações de franquias ou delivery, atendentes perdem muito tempo lendo mensagens longas, extraindo manualmente quantidades, tamanhos e intenções para planilhas. Este sistema elimina essa fricção, garantindo:
