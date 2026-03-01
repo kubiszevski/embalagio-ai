@@ -57,6 +57,11 @@ button[kind="secondary"]:hover {{
     box-shadow: 0 0 8px rgba(255, 106, 0, 0.4) !important;
 }}
 
+/* Correção de Legibilidade do Popover */
+div[data-testid="stPopoverContent"] * {{
+    color: #333333 !important;
+}}
+
 /* Inputs e Selectbox */
 .stSelectbox div[data-baseweb="select"] {{ 
     border-color: #FF6A00 !important; 
@@ -247,13 +252,13 @@ with col2:
 st.markdown("---")
 st.markdown('<h3 class="brand-text" style="text-align: center; margin-bottom: 20px;">🔍 Arquitetura Técnica (Backend Automatizado)</h3>', unsafe_allow_html=True)
 st.image("workflow_n8n.png", use_container_width=True)
-st.markdown('<p style="text-align: center; font-size: 0.8rem; color: #888;">*(Clique na imagem para ampliar e arrastar)*</p>', unsafe_allow_html=True)
+st.markdown('<p style="text-align: center; font-size: 0.8rem; color: #888;">Clique na imagem para ampliar e arrastar</p>', unsafe_allow_html=True)
 
 # ─── RODAPÉ PROFISSIONAL ───
 st.markdown("""
 <div style="text-align: center; margin-top: 60px; padding-top: 20px; border-top: 1px solid #1a3c54;">
     <p style="color: #888; font-size: 0.85rem; font-family: monospace;">
-        &lt;/&gt; Sistema de Triagem Automatizada | Desenvolvido por <b style="color: #FF6A00; text-shadow: 0 0 5px rgba(255,106,0,0.4);">Emmanuel</b>
+        &lt;/&gt; Sistema de Triagem Automatizada | Desenvolvido por <b style="color: #FF6A00;">Emmanuel</b>
     </p>
 </div>
 """, unsafe_allow_html=True)
