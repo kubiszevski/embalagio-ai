@@ -40,25 +40,21 @@ h1, h2, h3, h4, p, label, li, span {{ color: #f0f0f0; }}
 }}
 .stButton > button:hover {{ 
     background: #FF7A1A !important; 
-    box-shadow: 0 0 10px #FF6A00 !important;
 }}
 
-/* Correção do Botão "Sobre este Projeto" e "Limpar" */
+/* Botões Secundários ("Sobre este Projeto" e "Limpar") */
 button[kind="secondary"] {{
     background-color: transparent !important;
     color: #f0f0f0 !important;
     border: 1px solid #FF6A00 !important;
-    box-shadow: none !important;
 }}
 button[kind="secondary"]:hover {{
     background-color: #0E2A3A !important;
     color: #FF6A00 !important;
-    border: 1px solid #FF6A00 !important;
-    box-shadow: 0 0 8px rgba(255, 106, 0, 0.4) !important;
 }}
 
-/* Correção de Legibilidade do Popover */
-div[data-testid="stPopoverContent"] * {{
+/* Forçar legibilidade no Popover */
+div[data-testid="stPopoverBody"] * {{
     color: #333333 !important;
 }}
 
@@ -74,10 +70,10 @@ div[data-testid="stPopoverContent"] * {{
     color: #f0f0f0 !important; 
 }}
 
-/* Bordas Ativas / Glow nos campos de texto */
+/* Bordas Ativas nos campos de texto */
 .stSelectbox div[data-baseweb="select"]:focus-within, 
 .stTextArea textarea:focus {{
-    box-shadow: 0 0 10px #FF6A00 !important;
+    box-shadow: 0 0 0 2px #FF6A00 !important;
     outline: none !important;
 }}
 
@@ -90,13 +86,12 @@ div[data-testid="stPopoverContent"] * {{
     height: 400px; 
     display: flex; 
     flex-direction: column; 
-    box-shadow: 0 0 5px rgba(255, 106, 0, 0.2);
 }}
 
 .chat-messages {{ flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; }}
 .msg-user {{ display: flex; justify-content: flex-end; }}
 .msg-ai   {{ display: flex; justify-content: flex-start; }}
-.bubble {{ max-width: 85%; padding: 10px 14px; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.3); font-family: sans-serif; }}
+.bubble {{ max-width: 85%; padding: 10px 14px; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; font-family: sans-serif; }}
 .bubble-user {{ background: #005c4b !important; color: #e9edef !important; border-radius: 12px 4px 12px 12px; }}
 .bubble-ai {{ background: #202c33 !important; color: #e9edef !important; border-radius: 4px 12px 12px 12px; }}
 .bubble-label {{ color: #8696a0 !important; font-size: 0.7rem; font-family: monospace; margin-bottom: 4px;}}
@@ -104,6 +99,23 @@ div[data-testid="stPopoverContent"] * {{
 
 #MainMenu, footer, header {{ visibility: hidden; }}
 .block-container {{ padding-top: 1rem !important; max-width: 1200px; }}
+
+/* Cabeçalho Responsivo */
+.header-container {{
+    display: flex; justify-content: space-between; align-items: center; 
+    padding-bottom: 15px; border-bottom: 2px solid #FF6A00; margin-bottom: 25px; width: 100%;
+}}
+.header-left {{ display: flex; align-items: center; gap: 20px; }}
+.header-logo {{ width: 140px; border-radius: 8px; }}
+.header-title-box h1 {{ color: #FF6A00; font-size: 1.5rem; margin: 0; font-weight: 900; line-height: 1.2; }}
+.header-title-box p {{ color: #888; font-size: 0.85rem; margin: 0; font-family: monospace; }}
+
+@media (max-width: 768px) {{
+    .header-left {{ gap: 12px; }}
+    .header-logo {{ width: 90px; }}
+    .header-title-box h1 {{ font-size: 1.1rem; }}
+    .header-title-box p {{ font-size: 0.65rem; }}
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -135,14 +147,14 @@ else:
     badge_color = "#f87171"
     badge_text  = "○ SISTEMA OFFLINE"
 
-# ─── CABEÇALHO (Largura Total e Efeito Glow) ───
+# ─── CABEÇALHO ───
 st.markdown(f"""
-<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 2px solid #FF6A00; margin-bottom: 25px; box-shadow: 0 4px 15px -5px #FF6A00; width: 100%;">
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <img src="data:image/png;base64,{logo_b64}" style="width: 80px; border-radius: 8px;">
-        <div>
-            <h1 style="color: #FF6A00; font-size: 1.4rem; margin: 0; font-weight: 900; line-height: 1.2; text-shadow: 0 0 5px rgba(255, 106, 0, 0.4);">PORTAL DE ATENDIMENTO</h1>
-            <p style="color: #888; font-size: 0.8rem; margin: 0; font-family: monospace;">Triagem de leads · IA WhatsApp · Powered by Groq + Llama 3.3</p>
+<div class="header-container">
+    <div class="header-left">
+        <img src="data:image/png;base64,{logo_b64}" class="header-logo">
+        <div class="header-title-box">
+            <h1>PORTAL DE ATENDIMENTO</h1>
+            <p>Triagem de leads · IA WhatsApp · Powered by Groq + Llama 3.3</p>
         </div>
     </div>
     <div style="background-color: {badge_bg}; border: 1px solid {badge_border}; color: {badge_color}; padding: 6px 12px; border-radius: 20px; font-size: 0.7rem; font-family: monospace; font-weight: bold; white-space: nowrap;">
@@ -152,16 +164,20 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 with st.popover("ℹ️ Sobre este Projeto"):
+    # Usando HTML inline para garantir que o texto fique escuro independente do tema do Streamlit
     st.markdown("""
-    ### 📦 Embalagio IA - Atendimento & CRM
-    Sistema inteligente que simula o atendimento automatizado de uma franquia via WhatsApp. 
-    A IA interpreta a mensagem, extrai os itens do pedido e salva automaticamente no CRM, confirmando a solicitação com o cliente.
-
-    **Como Testar:**
-    1. Escolha um exemplo no menu suspenso ou digite seu pedido.
-    2. Clique em **ENVIAR MENSAGEM**.
-    3. A IA registrará os dados e responderá instantaneamente.
-    """)
+    <div style="color: #333333; font-family: sans-serif; font-size: 0.95rem;">
+        <h3 style="color: #FF6A00; margin-top: 0;">📦 Embalagio IA - Atendimento & CRM</h3>
+        <p>Sistema inteligente que simula o atendimento automatizado de uma franquia via WhatsApp. 
+        A IA interpreta a mensagem, extrai os itens do pedido e salva automaticamente no CRM, confirmando a solicitação com o cliente.</p>
+        <p><b>Como Testar:</b></p>
+        <ol style="margin-top: 0;">
+            <li>Escolha um exemplo no menu suspenso ou digite seu pedido.</li>
+            <li>Clique em <b>ENVIAR MENSAGEM</b>.</li>
+            <li>A IA registrará os dados e responderá instantaneamente.</li>
+        </ol>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.write("")
 
@@ -244,7 +260,7 @@ with col1:
 with col2:
     st.markdown('<p class="brand-text" style="font-family: monospace; font-weight: bold; text-transform: uppercase; margin: 0 0 10px 0;">📊 CRM — Leads em Tempo Real</p>', unsafe_allow_html=True)
     st.markdown(
-        f'<div style="background-color: #0E2A3A; border: 2px solid #FF6A00; border-radius: 12px; overflow: hidden; line-height: 0; box-shadow: 0 0 8px rgba(255, 106, 0, 0.3);"><iframe src="{SHEET_EMBED}" width="100%" height="600" frameborder="0" style="border-radius: 10px;"></iframe></div>',
+        f'<div style="background-color: #0E2A3A; border: 2px solid #FF6A00; border-radius: 12px; overflow: hidden; line-height: 0;"><iframe src="{SHEET_EMBED}" width="100%" height="600" frameborder="0" style="border-radius: 10px;"></iframe></div>',
         unsafe_allow_html=True
     )
     st.markdown('<p style="font-size: 0.75rem; color: #888; text-align: right; margin-top: 5px; font-family: monospace;">Atualização em tempo real · Google Sheets</p>', unsafe_allow_html=True)
@@ -258,7 +274,7 @@ st.markdown('<p style="text-align: center; font-size: 0.8rem; color: #888;">Cliq
 st.markdown("""
 <div style="text-align: center; margin-top: 60px; padding-top: 20px; border-top: 1px solid #1a3c54;">
     <p style="color: #888; font-size: 0.85rem; font-family: monospace;">
-        &lt;/&gt; Sistema de Triagem Automatizada | Desenvolvido por <b style="color: #FF6A00;">Emmanuel</b>
+        &lt;/&gt; Sistema de Triagem Automatizada | Desenvolvido por <b>Emmanuel</b>
     </p>
 </div>
 """, unsafe_allow_html=True)
