@@ -310,13 +310,19 @@ with col1:
                 try:
                     r = requests.post(WEBHOOK_URL, json={"message": user_input.strip()}, timeout=45)
                     if r.status_code == 200:
-                        reply = r.json().get("Reply", "Mensagem recebida!")
-                        st.session_state.history.append({"role": "ai", "text": reply})
-                        st.session_state.status = ("ok", "Lead salvo no CRM")
+                        try:
+                            # Tenta converter a resposta para JSON
+                            data = r.json()
+                            reply = data.get("Reply", "Mensagem recebida!")
+                            st.session_state.history.append({"role": "ai", "text": reply})
+                            st.session_state.status = ("ok", "Lead salvo no CRM")
+                        except ValueError:
+                            # Se o n8n retornar OK, mas não for um JSON válido (ex: workflow inativo)
+                            st.session_state.status = ("err", "Erro: n8n não retornou JSON (Ative o workflow)")
                     else:
                         st.session_state.status = ("err", f"Erro {r.status_code}")
                 except requests.exceptions.ConnectionError:
-                    st.session_state.status = ("err", "n8n offline — ative o workflow")
+                    st.session_state.status = ("err", "n8n offline — verifique o servidor")
                 except Exception as e:
                     st.session_state.status = ("err", str(e)[:60])
             st.rerun()
