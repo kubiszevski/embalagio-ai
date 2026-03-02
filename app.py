@@ -225,35 +225,35 @@ with col1:
         },
         "Pedido Direto (Fluxo Ideal)": {
             "msg": "Oi, sou o Marcos. Preciso de 500 caixas de pizza G.", 
-            "desc": "Testa se a IA extrai todos os dados de primeira, classificando a intenção e salvando o lead sem perguntas adicionais."
+            "desc": "Testa a extração imediata dos 3 dados básicos (Nome, Produto, Qtd), resultando em Status: Complete de primeira."
         },
         "Apenas Saudação (Receptividade)": {
             "msg": "Bom dia! Tudo bem?", 
-            "desc": "Testa a recepção inicial da IA, que deve se apresentar e perguntar como pode ajudar e qual o nome do cliente."
+            "desc": "Testa se a IA mantém o Status: Qualifying enquanto inicia o contato humanizado e solicita os dados iniciais."
         },
-        "Dados Faltantes: Nome (Conversacional)": {
+        "Dados Faltantes: Nome (Coleta)": {
             "msg": "Quero 1000 sacos kraft.", 
-            "desc": "Força a IA a reter o envio ao CRM e fazer uma pergunta humanizada solicitando o nome faltante."
+            "desc": "Valida se a IA identifica o produto e quantidade, mas retém o envio ao CRM até descobrir quem é o cliente."
         },
-        "Dados Faltantes: Quantidade (Conversacional)": {
+        "Dados Faltantes: Quantidade (Coleta)": {
             "msg": "Olá, meu nome é Júlia. Vocês vendem sacolas de papel?", 
-            "desc": "A IA deve registrar o nome e o produto, mas notar que falta a quantidade e conduzir o cliente a informá-la."
+            "desc": "Valida se a IA registra o nome e produto, mas solicita a quantidade antes de avançar para a finalização."
         },
-        "Inferência de Categoria (Inteligência)": {
+        "Captura de Detalhes (Step 4)": {
             "msg": "Me chamo Ana. Preciso de 200 potes plásticos para salada.", 
-            "desc": "Testa se a IA enquadra um produto fora do padrão (potes plásticos) na categoria genérica silenciosamente."
+            "desc": "Testa se a IA extrai detalhes extras ('para salada') para o Summary sem travar o fluxo com perguntas técnicas de tamanho ou cor."
         },
-        "Correção de Pedido (Compreensão de Contexto)": {
+        "Correção de Pedido (Contexto)": {
             "msg": "Sou o Carlos. Quero 100 caixas de bolo. Pensando bem, altera para 350 por favor.", 
-            "desc": "Avalia se a IA ignora a primeira quantidade e registra a intenção final corrigida antes de salvar o lead."
+            "desc": "Avalia se a IA ignora a informação conflitante e registra a intenção final corrigida (350 unidades)."
         },
         "Regra de Alta Quantidade (Segurança)": {
             "msg": "Bom dia. Queremos 5000 sacos de papel para pão. Aqui é a padaria Doce Pão.", 
-            "desc": "Aciona a regra de negócio de segurança: a IA deve segurar o lead e pedir confirmação para quantidades muito altas."
+            "desc": "Aciona o Step 5: a IA identifica o volume alto (>1000) e solicita confirmação explícita antes de validar o lead."
         },
-        "Fora de Escopo (Resiliência)": {
+        "Fora de Escopo (Filtro de Lixo)": {
             "msg": "Boa tarde, sou o Pedro. Vocês consertam impressoras?", 
-            "desc": "Testa se a IA consegue negar o atendimento educadamente, reforçando que vende apenas embalagens."
+            "desc": "Testa o Step 1.5: a IA deve desqualificar o pedido (Status: Disqualified) e não registrar 'lixo' no seu CRM."
         }
     }
 
