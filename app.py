@@ -3,7 +3,8 @@ import requests
 import base64
 
 WEBHOOK_URL = "https://n8n-production-adc8.up.railway.app/webhook/embalagio-atendimento"
-SHEET_EMBED  = "https://docs.google.com/spreadsheets/d/1QcAuW2CIVvVv03asnwpj32AvT6rXKV9FXwLdSHXWhiw/edit?usp=sharing"
+# Adicionado '&rm=minimal' no final para esconder menus do Google Sheets
+SHEET_EMBED  = "https://docs.google.com/spreadsheets/d/1QcAuW2CIVvVv03asnwpj32AvT6rXKV9FXwLdSHXWhiw/edit?usp=sharing&rm=minimal"
 
 st.set_page_config(page_title="Embalagio CRM", page_icon="📦", layout="wide")
 
@@ -16,8 +17,15 @@ def get_img_as_base64(file_path):
 
 logo_b64 = get_img_as_base64("logo_embalagio.png")
 
+# CSS ATUALIZADO (Inclusão de regras para esconder menus do Streamlit)
 st.markdown(f"""
 <style>
+/* Esconder menu padrão do Streamlit e marca d'água no rodapé para o vídeo */
+#MainMenu {{ visibility: hidden; }}
+footer {{ visibility: hidden; }}
+header {{ visibility: hidden; }}
+[data-testid="stToolbar"] {{ visibility: hidden; }}
+
 .stApp, .stApp > header {{ background-color: #0A1F2C !important; }}
 
 h1, h2, h3, h4, p, label, li, span {{ color: #f0f0f0; }}
@@ -92,7 +100,6 @@ div[data-testid="stPopoverBody"] * {{
 .bubble-label {{ color: #8696a0 !important; font-size: 0.7rem; font-family: monospace; margin-bottom: 4px;}}
 .chat-empty {{ color: #8696a0 !important; text-align: center; font-family: monospace; font-size: 0.85rem; margin-top: auto; margin-bottom: auto; }}
 
-header {{ visibility: hidden; }}
 .block-container {{ padding-top: 1rem !important; max-width: 1400px; }}
 
 .header-container {{
@@ -128,6 +135,7 @@ def check_n8n():
 n8n_online = check_n8n()
 badge_bg, badge_border, badge_color, badge_text = ("#0d2b1a", "#1a5c35", "#4ade80", "● SISTEMA ATIVO") if n8n_online else ("#2b0d0d", "#5c1a1a", "#f87171", "○ SISTEMA OFFLINE")
 
+# Bolha aumentada (padding 8px 18px e font-size 0.85rem)
 st.markdown(f"""
 <div class="header-container">
     <div class="header-left">
@@ -137,18 +145,16 @@ st.markdown(f"""
             <p>Triagem de leads · IA WhatsApp · Powered by Groq + Llama 3.3</p>
         </div>
     </div>
-    <div style="background-color: {badge_bg}; border: 1px solid {badge_border}; color: {badge_color}; padding: 6px 12px; border-radius: 20px; font-size: 0.7rem; font-family: monospace; font-weight: bold; white-space: nowrap;">
+    <div style="background-color: {badge_bg}; border: 1px solid {badge_border}; color: {badge_color}; padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-family: monospace; font-weight: bold; white-space: nowrap;">
         {badge_text}
     </div>
 </div>
 """, unsafe_allow_html=True)
 
+# Popover limpo: O Streamlit fecha automaticamente ao clicar fora
 with st.popover("ℹ️ Sobre este Projeto"):
     st.markdown("""
-    <div style="text-align: left; margin-bottom: 10px;">
-        <button onclick="window.parent.document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape'}));" style="background: transparent; border: none; color: #888; font-size: 1.1rem; cursor: pointer; padding: 0; font-family: sans-serif;">X</button>
-    </div>
-    <div style="color: #333333; font-family: sans-serif; font-size: 0.95rem;">
+    <div style="color: #333333; font-family: sans-serif; font-size: 0.95rem; padding: 5px;">
         <h3 style="color: #FF6A00; margin-top: 0; margin-bottom: 10px;">📦 Embalagio IA - Triagem & CRM</h3>
         <p style="margin-bottom: 10px;">O <b>Embalagio IA</b> é um assistente virtual autônomo focado na qualificação de leads. Utilizando LLMs (Llama 3.3 via Groq) integrados ao n8n e hospedado no Railway, ele simula o atendimento via WhatsApp.</p>
         <p style="margin-bottom: 10px;">Ele interpreta mensagens, extrai dados (Nome, Categoria dinâmica e Quantidade) e alimenta um CRM no Google Sheets em tempo real, garantindo leads qualificados para o time comercial.</p>
@@ -158,13 +164,15 @@ with st.popover("ℹ️ Sobre este Projeto"):
 
 st.write("")
 
-col1, col2 = st.columns([1, 1.6], gap="large")
+# Ajuste da proporção para caber as 4 colunas da planilha (1 vs 1.8)
+col1, col2 = st.columns([1, 1.8], gap="large")
 
 with col1:
-    chat_head_col1, chat_head_col2 = st.columns([4, 1], vertical_alignment="center")
+    chat_head_col1, chat_head_col2 = st.columns([5, 1.5], vertical_alignment="center")
     chat_head_col1.markdown('<p class="brand-text" style="font-family: monospace; font-weight: bold; text-transform: uppercase; margin: 0;">💬 Chat de Atendimento</p>', unsafe_allow_html=True)
     
-    if chat_head_col2.button("Limpar Chat", type="secondary", use_container_width=True):
+    # Botão de limpar menor e com emoji
+    if chat_head_col2.button("🗑️ Limpar", type="secondary", use_container_width=True):
         st.session_state.history = []
         st.session_state.status = None
         st.session_state.context_start_idx = 0
@@ -191,8 +199,9 @@ with col1:
     
     st.write("")
     
+    # Textos do menu sem os "--"
     testes_opcoes = {
-        "-- Digite livremente ou escolha um cenário de teste --": {"msg": "", "desc": ""},
+        "Digite livremente ou escolha um cenário de teste": {"msg": "", "desc": ""},
         "Pedido Direto (Fluxo Ideal)": {
             "msg": "Oi, sou o Marcos. Preciso de 500 caixas de pizza G.", 
             "desc": "Testa se a IA extrai todos os dados de primeira, classificando a intenção e salvando o lead sem perguntas adicionais."
@@ -213,7 +222,7 @@ with col1:
 
     def on_select_change():
         escolha = st.session_state.seletor_teste
-        if escolha != "-- Digite livremente ou escolha um cenário de teste --":
+        if escolha != "Digite livremente ou escolha um cenário de teste":
             st.session_state.caixa_texto = testes_opcoes[escolha]["msg"]
 
     escolha_atual = st.selectbox(
@@ -223,7 +232,7 @@ with col1:
         on_change=on_select_change
     )
 
-    if escolha_atual != "-- Digite livremente ou escolha um cenário de teste --":
+    if escolha_atual != "Digite livremente ou escolha um cenário de teste":
         st.markdown(f"""
         <div style="background-color: #0d212e; border-left: 4px solid #FF6A00; padding: 12px; margin-bottom: 15px; border-radius: 0 8px 8px 0;">
             <span style="color: #FF6A00; font-size: 0.8rem; font-family: monospace; font-weight: bold; text-transform: uppercase;">Objetivo do Teste</span><br>
