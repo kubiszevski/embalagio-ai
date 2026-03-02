@@ -219,22 +219,41 @@ with col1:
     st.write("")
     
     testes_opcoes = {
-        "Digite livremente ou escolha um cenário de teste": {"msg": "", "desc": ""},
+        "Digite livremente ou escolha um cenário de teste": {
+            "msg": "", 
+            "desc": ""
+        },
         "Pedido Direto (Fluxo Ideal)": {
             "msg": "Oi, sou o Marcos. Preciso de 500 caixas de pizza G.", 
             "desc": "Testa se a IA extrai todos os dados de primeira, classificando a intenção e salvando o lead sem perguntas adicionais."
         },
-        "Dados Faltantes (Conversacional)": {
+        "Apenas Saudação (Receptividade)": {
+            "msg": "Bom dia! Tudo bem?", 
+            "desc": "Testa a recepção inicial da IA, que deve se apresentar e perguntar como pode ajudar e qual o nome do cliente."
+        },
+        "Dados Faltantes: Nome (Conversacional)": {
             "msg": "Quero 1000 sacos kraft.", 
             "desc": "Força a IA a reter o envio ao CRM e fazer uma pergunta humanizada solicitando o nome faltante."
+        },
+        "Dados Faltantes: Quantidade (Conversacional)": {
+            "msg": "Olá, meu nome é Júlia. Vocês vendem sacolas de papel?", 
+            "desc": "A IA deve registrar o nome e o produto, mas notar que falta a quantidade e conduzir o cliente a informá-la."
         },
         "Inferência de Categoria (Inteligência)": {
             "msg": "Me chamo Ana. Preciso de 200 potes plásticos para salada.", 
             "desc": "Testa se a IA enquadra um produto fora do padrão (potes plásticos) na categoria genérica silenciosamente."
         },
+        "Correção de Pedido (Compreensão de Contexto)": {
+            "msg": "Sou o Carlos. Quero 100 caixas de bolo. Pensando bem, altera para 350 por favor.", 
+            "desc": "Avalia se a IA ignora a primeira quantidade e registra a intenção final corrigida antes de salvar o lead."
+        },
         "Regra de Alta Quantidade (Segurança)": {
             "msg": "Bom dia. Queremos 5000 sacos de papel para pão. Aqui é a padaria Doce Pão.", 
-            "desc": "Aciona a regra de negócio de segurança: a IA deve segurar o lead e pedir que o cliente confirme se realmente deseja essa alta quantidade (>1000)."
+            "desc": "Aciona a regra de negócio de segurança: a IA deve segurar o lead e pedir confirmação para quantidades muito altas."
+        },
+        "Fora de Escopo (Resiliência)": {
+            "msg": "Boa tarde, sou o Pedro. Vocês consertam impressoras?", 
+            "desc": "Testa se a IA consegue negar o atendimento educadamente, reforçando que vende apenas embalagens."
         }
     }
 
