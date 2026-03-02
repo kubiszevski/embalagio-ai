@@ -225,35 +225,35 @@ with col1:
         },
         "Pedido Direto (Fluxo Ideal)": {
             "msg": "Oi, sou o Marcos. Preciso de 500 caixas de pizza G.", 
-            "desc": "Testa a extração dos 3 dados básicos (Nome, Produto, Qtd) em um único passo."
+            "desc": "Testa a extração imediata dos 3 dados fundamentais (Nome, Produto e Quantidade) em um único passo."
         },
         "Apenas Saudação": {
             "msg": "Bom dia! Tudo bem?", 
-            "desc": "Testa se a IA mantém Status: Qualifying ao iniciar o contato humanizado."
+            "desc": "Testa se o assistente inicia o atendimento de forma humanizada e solicita as informações necessárias para o pedido."
         },
         "Dados Faltantes: Nome": {
             "msg": "Quero 1000 sacos kraft.", 
-            "desc": "Valida se a IA retém o lead até o cliente informar o nome ou empresa."
+            "desc": "Valida se o sistema identifica o interesse no produto, mas aguarda a identificação do cliente antes de registrar o lead."
         },
         "Dados Faltantes: Quantidade": {
             "msg": "Olá, meu nome é Júlia. Vocês vendem sacolas de papel?", 
-            "desc": "Valida se a IA solicita a quantidade necessária antes de finalizar o pedido."
+            "desc": "Verifica se a inteligência reconhece o item desejado, mas solicita o volume de compra antes de finalizar."
         },
         "Categorização Simples": {
             "msg": "Me chamo Ana. Preciso de 200 potes plásticos.", 
-            "desc": "Testa a identificação direta do produto e nome sem interferência de detalhes técnicos."
+            "desc": "Avalia a precisão do bot em capturar o nome e o item de interesse de forma direta e sem ruídos."
         },
         "Correção de Quantidade": {
             "msg": "Sou o Carlos. Quero 100 caixas de bolo. Pensando bem, altera para 350 por favor.", 
-            "desc": "Testa se a IA ignora a informação antiga e registra o valor final corrigido."
+            "desc": "Testa a capacidade da IA em entender mudanças de decisão durante a conversa e registrar apenas o valor final."
         },
         "Alta Quantidade (>1000)": {
             "msg": "Bom dia. Queremos 5000 sacos de papel para pão. Aqui é a padaria Doce Pão.", 
-            "desc": "Aciona a trava de segurança para volumes altos, exigindo confirmação do cliente."
+            "desc": "Aciona o protocolo de segurança para volumes elevados, exigindo uma confirmação explícita do cliente."
         },
         "Fora de Escopo (Filtro)": {
             "msg": "Boa tarde, sou o Pedro. Vocês consertam impressoras?", 
-            "desc": "Testa o filtro de segurança que desqualifica (Status: Disqualified) pedidos fora do nicho."
+            "desc": "Testa o filtro de segurança que ignora solicitações que não pertencem ao catálogo de produtos da empresa."
         }
     }
 
