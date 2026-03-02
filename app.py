@@ -1,6 +1,8 @@
 import streamlit as st
 import requests
 import base64
+import re
+import json
 
 WEBHOOK_URL = "https://n8n-production-adc8.up.railway.app/webhook/embalagio-atendimento"
 SHEET_EMBED  = "https://docs.google.com/spreadsheets/d/1QcAuW2CIVvVv03asnwpj32AvT6rXKV9FXwLdSHXWhiw/edit?usp=sharing&rm=minimal"
@@ -29,7 +31,7 @@ h1, h2, h3, h4, p, label, li, span {{ color: #f0f0f0; }}
 
 .brand-text {{ color: #FF6A00 !important; }}
 
-/* Títulos das colunas alinhados perfeitamente */
+/* Títulos das colunas */
 .panel-title {{
     color: #FF6A00;
     font-family: monospace;
@@ -37,9 +39,9 @@ h1, h2, h3, h4, p, label, li, span {{ color: #f0f0f0; }}
     text-transform: uppercase;
     margin: 0;
     font-size: 1.05rem;
-    padding-bottom: 10px;
 }}
 
+/* Botão Primário */
 button[kind="primary"] {{ 
     background: #FF6A00 !important; 
     color: #ffffff !important; 
@@ -53,21 +55,22 @@ button[kind="primary"]:hover {{
     background: #FF7A1A !important; 
 }}
 
-/* Botão Limpar arrumado (Sem truques de position) */
+/* SOLUÇÃO 3: Botão Limpar Estilizado para Layout Nativo (Sem Position Absolute) */
 button[kind="secondary"] {{
     background: transparent !important;
     color: #8696a0 !important;
-    border: 1px solid #1a3c54 !important;
-    border-radius: 6px !important;
+    border: 1px solid #1a3c54 !important; /* Borda discreta para delimitar */
+    box-shadow: none !important;
     font-size: 0.85rem !important;
-    padding: 5px 10px !important;
+    padding: 4px 10px !important;
+    border-radius: 6px !important;
     min-height: 0 !important;
-    height: auto !important;
-    margin-bottom: 10px;
+    transition: all 0.2s ease;
 }}
 button[kind="secondary"]:hover {{
     color: #f0f0f0 !important;
-    background: #1a3c54 !important;
+    border-color: #FF6A00 !important;
+    background: rgba(255, 106, 0, 0.1) !important;
 }}
 
 div[data-testid="stPopoverBody"] * {{ color: #333333 !important; }}
@@ -82,17 +85,18 @@ div[data-testid="stPopoverBody"] * {{ color: #333333 !important; }}
 .msg-user {{ display: flex; justify-content: flex-end; }}
 .msg-ai   {{ display: flex; justify-content: flex-start; }}
 
-/* Bolhas de chat BLINDADAS contra quebra de palavras curtas */
+/* SOLUÇÃO 1: Bolhas de chat blindadas contra quebra de palavras curtas */
 .bubble {{ 
     width: fit-content; 
     max-width: 85%; 
-    min-width: 40px;
     padding: 10px 14px; 
     font-size: 0.95rem; 
     line-height: 1.4; 
-    white-space: pre-wrap; 
-    word-break: normal !important; 
-    overflow-wrap: break-word !important; 
+    white-space: pre-wrap !important; 
+    word-break: normal !important;        /* Impede a quebra de sílabas */
+    overflow-wrap: break-word !important; /* Quebra apenas URLs gigantes */
+    -webkit-hyphens: none !important;     /* Previne hifenização automática do navegador */
+    hyphens: none !important;
     font-family: sans-serif; 
 }}
 .bubble-user {{ background: #005c4b !important; color: #e9edef !important; border-radius: 12px 4px 12px 12px; }}
@@ -173,11 +177,11 @@ st.write("")
 col1, col2 = st.columns([1.2, 2.2], gap="large")
 
 with col1:
-    # Cabeçalho do Chat usando colunas nativas para evitar quebras
-    chat_head_col1, chat_head_col2 = st.columns([4, 1.5], vertical_alignment="bottom")
-    with chat_head_col1:
+    # SOLUÇÃO 2 e 3: Colunas aninhadas nativas para Título e Botão (Alinhamento centralizado na vertical)
+    c_title1, c_btn = st.columns([0.7, 0.3], vertical_alignment="center")
+    with c_title1:
         st.markdown('<p class="panel-title">💬 Chat de Atendimento</p>', unsafe_allow_html=True)
-    with chat_head_col2:
+    with c_btn:
         if st.button("🗑️ Limpar", type="secondary", use_container_width=True):
             st.session_state.history = []
             st.session_state.status = None
@@ -267,14 +271,9 @@ with col1:
                     r = requests.post(WEBHOOK_URL, json=payload, timeout=45)
                     
                     if r.status_code == 200:
-                        import re
-                        import json
-                        
                         raw_text = r.text
-                        
                         try:
                             match = re.search(r'(\{.*\})', raw_text, re.DOTALL)
-                            
                             if match:
                                 clean_json = match.group(1)
                                 data = json.loads(clean_json)
@@ -315,7 +314,13 @@ with col1:
             st.markdown(f'<div style="color: #f87171; font-family: monospace; font-size: 0.85rem; font-weight: bold; margin-top: 10px;">✗ {msg}</div>', unsafe_allow_html=True)
 
 with col2:
-    st.markdown('<p class="panel-title">📊 CRM — Leads em Tempo Real</p>', unsafe_allow_html=True)
+    # SOLUÇÃO 2: Repetindo exatamente a mesma estrutura de colunas do Chat para garantir o nivelamento horizontal perfeito.
+    c_title2, c_empty = st.columns([0.7, 0.3], vertical_alignment="center")
+    with c_title2:
+        st.markdown('<p class="panel-title">📊 CRM — Leads em Tempo Real</p>', unsafe_allow_html=True)
+    with c_empty:
+        st.empty() # Espaço vazio intencional para forçar a criação da mesma "margem" superior do Streamlit.
+
     st.markdown(
         f'<div style="background-color: #0E2A3A; border: 2px solid #FF6A00; border-radius: 12px; overflow: hidden; line-height: 0;"><iframe src="{SHEET_EMBED}" width="100%" height="600" frameborder="0" style="border-radius: 10px;"></iframe></div>',
         unsafe_allow_html=True
