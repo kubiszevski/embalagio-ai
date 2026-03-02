@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import requests
 import base64
 
@@ -77,7 +78,7 @@ div[data-testid="stPopoverBody"] * {{
     flex-direction: column; 
 }}
 
-.chat-messages {{ flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; }}
+.chat-messages {{ flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }}
 .msg-user {{ display: flex; justify-content: flex-end; }}
 .msg-ai   {{ display: flex; justify-content: flex-start; }}
 .bubble {{ max-width: 85%; padding: 10px 14px; font-size: 0.95rem; line-height: 1.4; word-break: normal; overflow-wrap: break-word; font-family: sans-serif; }}
@@ -85,6 +86,19 @@ div[data-testid="stPopoverBody"] * {{
 .bubble-ai {{ background: #202c33 !important; color: #e9edef !important; border-radius: 4px 12px 12px 12px; }}
 .bubble-label {{ color: #8696a0 !important; font-size: 0.7rem; font-family: monospace; margin-bottom: 4px;}}
 .chat-empty {{ color: #8696a0 !important; text-align: center; font-family: monospace; font-size: 0.85rem; margin-top: auto; margin-bottom: auto; }}
+
+/* Conserto do botão secundário (Popover) para não ficar branco */
+button[kind="secondary"] {{
+    background-color: transparent !important;
+    color: #f0f0f0 !important;
+    border: 1px solid #FF6A00 !important;
+}}
+button[kind="secondary"]:hover, button[kind="secondary"]:focus, button[kind="secondary"]:active {{
+    background-color: #0E2A3A !important;
+    color: #FF6A00 !important;
+    border: 1px solid #FF6A00 !important;
+    box-shadow: none !important;
+}}
 
 #MainMenu, footer, header {{ visibility: hidden; }}
 .block-container {{ padding-top: 1rem !important; max-width: 1200px; }}
@@ -120,6 +134,8 @@ if "caixa_texto" not in st.session_state:
 if "texto_enviado" not in st.session_state:
     st.session_state.texto_enviado = ""
 
+# Cache de 30 segundos para aliviar o n8n
+@st.cache_data(ttl=30)
 def check_n8n():
     try:
         r = requests.post(WEBHOOK_URL, json={"message": "__ping__", "history": []}, timeout=4)
@@ -150,9 +166,9 @@ with st.popover("ℹ️ Sobre este Projeto"):
     st.markdown("""
     <div style="color: #333333; font-family: sans-serif; font-size: 0.95rem;">
         <h3 style="color: #FF6A00; margin-top: 0; margin-bottom: 10px;">📦 Embalagio IA - Triagem & CRM</h3>
-        <p style="margin-bottom: 10px;">O <b>Embalagio IA</b> é um assistente virtual autônomo focado na qualificação de leads B2B/B2C. Utilizando LLMs de baixa latência (Llama 3.3 via Groq) integrados ao n8n, ele atua no topo do funil de vendas simulando o WhatsApp.</p>
+        <p style="margin-bottom: 10px;">O <b>Embalagio IA</b> é um assistente virtual autônomo focado na qualificação de leads B2B/B2C. Utilizando LLMs de baixa latência (Llama 3.3 via Groq) integrados ao n8n (hospedado no Railway), ele atua no topo do funil de vendas simulando o WhatsApp.</p>
         <p style="margin-bottom: 10px;">Ele interpreta intenções não estruturadas de clientes, extrai dados essenciais (Nome, Categoria e Quantidade) lidando com falhas na comunicação humana, e alimenta um CRM em tempo real. Isso elimina fricções operacionais e garante que a equipe comercial receba leads altamente qualificados.</p>
-        <p style="font-size: 0.85rem; border-top: 1px solid #ccc; padding-top: 10px;">Desenvolvido com Python, Streamlit, n8n, Groq API e Google Sheets.</p>
+        <p style="font-size: 0.85rem; border-top: 1px solid #ccc; padding-top: 10px;">Desenvolvido com Python, Streamlit, n8n, Groq API e Google Sheets. <br><br>👉 <a href="https://github.com/kubiszevski/embalagio-atendimento/blob/main/README.md" target="_blank" style="color: #FF6A00; text-decoration: none; font-weight: bold;">Ler a Documentação no GitHub (README)</a></p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -181,25 +197,40 @@ with col1:
             else:
                 msgs_html += f'<div class="msg-ai"><div><div class="bubble-label">🤖 Embalagio IA</div><div class="bubble bubble-ai"><p style="margin:0;">{m["text"]}</p></div></div></div>'
 
+    # Renderiza o chat
     st.markdown(f'<div class="chat-panel"><div class="chat-messages">{msgs_html}</div></div>', unsafe_allow_html=True)
+    
+    # Injeta um JS silencioso para forçar o scroll para baixo sempre que o chat for renderizado
+    components.html(
+        """
+        <script>
+            const chatContainer = window.parent.document.querySelector('.chat-messages');
+            if (chatContainer) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        </script>
+        """,
+        height=0, width=0
+    )
+    
     st.write("")
     
     # --- NOVO MENU DE TESTES COM SELECTBOX ---
     testes_opcoes = {
         "-- Digite livremente ou escolha um cenário de teste --": {"msg": "", "desc": ""},
-        "Nível 1: Pedido Direto": {
+        "Pedido Direto (Fluxo Ideal)": {
             "msg": "Oi, sou o Marcos. Preciso de 500 caixas de pizza G.", 
             "desc": "Testa se a IA extrai todos os dados de primeira, classificando a intenção e salvando o lead sem perguntas adicionais."
         },
-        "Nível 2: Dados Faltantes": {
+        "Dados Faltantes (Conversacional)": {
             "msg": "Quero 1000 sacos kraft.", 
             "desc": "Força a IA a reter o envio ao CRM e fazer uma pergunta humanizada solicitando o nome faltante."
         },
-        "Nível 3: Inferência de Categoria": {
+        "Inferência de Categoria (Inteligência)": {
             "msg": "Me chamo Ana. Preciso de 200 potes plásticos para salada.", 
             "desc": "Testa se a IA enquadra um produto fora do padrão (potes plásticos) na categoria genérica 'Diversos' silenciosamente."
         },
-        "Nível 4: Regra de Alta Quantidade": {
+        "Regra de Alta Quantidade (Segurança)": {
             "msg": "Bom dia. Queremos 5000 sacos de papel para pão. Aqui é a padaria Doce Pão.", 
             "desc": "Aciona a regra de negócio de segurança: a IA deve segurar o lead e pedir que o cliente confirme se realmente deseja essa alta quantidade (>1000)."
         }
@@ -296,7 +327,7 @@ st.markdown('<p style="text-align: center; font-size: 0.8rem; color: #888;">Cliq
 st.markdown("""
 <div style="text-align: center; margin-top: 60px; padding-top: 20px; border-top: 1px solid #1a3c54;">
     <p style="color: #888; font-size: 0.85rem; font-family: monospace;">
-        &lt;/&gt; Sistema de Triagem Automatizada | Desenvolvido por <b>Emmanuel</b>
+        &lt;/&gt; Sistema de Triagem Automatizada | Desenvolvido por <b>Emmanuel</b> | <a href="https://github.com/kubiszevski/embalagio-atendimento/blob/main/README.md" target="_blank" style="color: #FF6A00; text-decoration: none; font-weight: bold;">📖 Ver Documentação (README)</a>
     </p>
 </div>
 """, unsafe_allow_html=True)
