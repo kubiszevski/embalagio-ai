@@ -231,8 +231,8 @@ with col1:
             "msg": "Oi, sou o Marcos. Preciso de 500 caixas de pizza G.", 
             "desc": "Testa a extração imediata dos dados fundamentais (Nome, Produto e Quantidade) e a correta categorização do item."
         },
-        "Pedido Técnico": {
-            "msg": "Oi, sou a Patrícia da Doce Requinte. Preciso de 150 caixas brancas para 6 docinhos.", 
+        "Pedido Personalizado": {
+            "msg": "Olá, sou a Patrícia da Doce Arte. Preciso de 150 sacolas de papel kraft azul marinho com alça de cetim branca para kits de presente.", 
             "desc": "Avalia a precisão da IA em processar um pedido com detalhes de cor e uso específico em uma única frase."
         },
         "Filtro de Segurança e Escopo": {
