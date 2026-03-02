@@ -219,7 +219,7 @@ with col1:
 
     st.write("")
     
-    # --- NOVO SISTEMA DE TESTES (4 NÍVEIS) ---
+# --- NOVO SISTEMA DE TESTES (4 NÍVEIS) ---
     with st.expander("🧪 Níveis de Teste da IA (Clique para expandir)"):
         st.markdown("<p style='font-size: 0.85rem; color: #888;'>Testes criados para desafiar o modelo de linguagem e as regras de negócio.</p>", unsafe_allow_html=True)
         
@@ -232,7 +232,6 @@ with col1:
         
         for nome, msg_teste, desc in testes:
             col_btn, col_desc = st.columns([1, 2.5], vertical_alignment="center")
-            # Ao clicar, atualizamos a variável caixa_texto no session_state
             if col_btn.button(f"Carregar {nome}", key=f"btn_{nome}", use_container_width=True):
                 st.session_state.caixa_texto = msg_teste
             col_desc.markdown(f"<span style='font-size: 0.85rem; color: #60a5fa;'>💡 <b>Objetivo:</b> {desc}</span>", unsafe_allow_html=True)
@@ -240,12 +239,20 @@ with col1:
     # --- CAIXA DE TEXTO COM GERENCIAMENTO DE ESTADO ---
     if "caixa_texto" not in st.session_state:
         st.session_state.caixa_texto = ""
+    if "texto_enviado" not in st.session_state:
+        st.session_state.texto_enviado = ""
 
-    # Usamos st.session_state.caixa_texto como a key, ligando o widget à variável global
-    user_input = st.text_area("Sua mensagem:", key="caixa_texto", height=80, placeholder="Digite seu pedido aqui...")
+    def preparar_envio():
+        # Copia o que o usuário digitou para enviar ao n8n e limpa a caixa instantaneamente
+        st.session_state.texto_enviado = st.session_state.caixa_texto
+        st.session_state.caixa_texto = ""
 
-    if st.button("ENVIAR MENSAGEM ➜", use_container_width=True):
-        msg = st.session_state.caixa_texto.strip()
+    st.text_area("Sua mensagem:", key="caixa_texto", height=80, placeholder="Digite seu pedido aqui...")
+
+    # O botão chama a função preparar_envio ANTES de descer para o código
+    if st.button("ENVIAR MENSAGEM ➜", use_container_width=True, on_click=preparar_envio):
+        msg = st.session_state.texto_enviado.strip()
+        
         if msg:
             st.session_state.history.append({"role": "user", "text": msg})
             
@@ -275,13 +282,10 @@ with col1:
                         st.session_state.status = ("err", f"Erro de comunicação: {r.status_code}")
                 except Exception as e:
                     st.session_state.status = ("err", "Sistema Offline ou Falha na Conexão.")
-            
-            # Esvazia a caixa de texto e recarrega a página instantaneamente
-            st.session_state.caixa_texto = ""
-            st.rerun()
+                    
+            # Removido o st.session_state.caixa_texto = "" e o st.rerun() daqui!
         else:
             st.warning("A mensagem não pode estar vazia.")
-
     # Feedback visual dinâmico abaixo do botão
     if st.session_state.status:
         t, msg = st.session_state.status
