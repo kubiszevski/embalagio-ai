@@ -91,8 +91,7 @@ div[data-testid="stPopoverBody"] * {{
 .chat-messages {{ flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; }}
 .msg-user {{ display: flex; justify-content: flex-end; }}
 .msg-ai   {{ display: flex; justify-content: flex-start; }}
-.bubble { max-width: 85%; padding: 10px 14px; font-size: 0.95rem; line-height: 1.4; word-break: normal; overflow-wrap: break-word; font-family: sans-serif; }
-.bubble-user {{ background: #005c4b !important; color: #e9edef !important; border-radius: 12px 4px 12px 12px; }}
+.bubble {{ max-width: 85%; padding: 10px 14px; font-size: 0.95rem; line-height: 1.4; word-break: normal; overflow-wrap: break-word; font-family: sans-serif; }}.bubble-user {{ background: #005c4b !important; color: #e9edef !important; border-radius: 12px 4px 12px 12px; }}
 .bubble-ai {{ background: #202c33 !important; color: #e9edef !important; border-radius: 4px 12px 12px 12px; }}
 .bubble-label {{ color: #8696a0 !important; font-size: 0.7rem; font-family: monospace; margin-bottom: 4px;}}
 .chat-empty {{ color: #8696a0 !important; text-align: center; font-family: monospace; font-size: 0.85rem; margin-top: auto; margin-bottom: auto; }}
