@@ -223,13 +223,17 @@ with col1:
             "msg": "", 
             "desc": ""
         },
-        "Apenas Saudação": {
+        "Saudação": {
             "msg": "Bom dia! Tudo bem com vocês?", 
             "desc": "Valida se o assistente inicia o atendimento de forma humanizada e solicita as informações necessárias para o pedido."
         },
         "Pedido de Caixas de Pizza": {
             "msg": "Oi, sou o Marcos. Preciso de 500 caixas de pizza G.", 
             "desc": "Testa a extração imediata dos dados fundamentais (Nome, Produto e Quantidade) e a correta categorização do item."
+        },
+        "Pedido Técnico Complexo": {
+            "msg": "Olá, sou a Patrícia da confeitaria 'Doce Requinte'. Preciso de 150 caixas de acetato transparentes para ovos de colher de 250g.", 
+            "desc": "Avalia a precisão da IA em processar um pedido com múltiplas especificações técnicas em uma única frase, sem ultrapassar o limite de volume."
         },
         "Filtro de Segurança e Escopo": {
             "msg": "Boa tarde, sou o Pedro. Vocês consertam impressoras?", 
@@ -241,7 +245,7 @@ with col1:
         },
         "Volume Alto com Confirmação": {
             "msg": "Olá, aqui é a Renata. Queremos 3000 mini embalagens kraft, pode confirmar esse volume pra mim.", 
-            "desc": "Prova a inteligência do fluxo: se o cliente já autoriza o volume alto na mensagem inicial, o sistema reconhece e não solicita reconfirmação."
+            "desc": "Prova a inteligência do fluxo: se o cliente já autoriza o volume alto na mensagem inicial, o sistema não solicita reconfirmação."
         }
     }
 
