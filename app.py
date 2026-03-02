@@ -165,8 +165,8 @@ st.markdown(f"""
 
 with st.popover("ℹ️ Sobre este Projeto"):
     st.markdown("""
-    <div style="text-align: left; margin-bottom: 10px;">
-        <button onclick="window.parent.document.dispatchEvent(new MouseEvent('mousedown'))" style="background: transparent; border: 1px solid #888; color: #888; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer;">Fechar</button>
+    <div style="text-align: right; margin-bottom: 8px;">
+        <button onclick="window.parent.document.dispatchEvent(new MouseEvent('mousedown'))" style="background: transparent; border: none; color: #666; font-size: 1.1rem; cursor: pointer; line-height: 1; padding: 2px 6px; border-radius: 4px;" title="Fechar">&#x2715;</button>
     </div>
     <div style="color: #333333; font-family: sans-serif; font-size: 0.95rem;">
         <h3 style="color: #FF6A00; margin-top: 0; margin-bottom: 10px;">📦 Embalagio IA - Triagem & CRM</h3>
@@ -183,9 +183,9 @@ st.write("")
 col1, col2 = st.columns([1, 1.3], gap="large")
 
 with col1:
-    chat_head_col1, chat_head_col2 = st.columns([3, 1.2], vertical_alignment="center")
+    chat_head_col1, chat_head_col2 = st.columns([3, 1], vertical_alignment="center")
     chat_head_col1.markdown('<p class="brand-text" style="font-family: monospace; font-weight: bold; text-transform: uppercase; margin: 0;">💬 Chat de Atendimento</p>', unsafe_allow_html=True)
-    if chat_head_col2.button("🗑️ Limpar", use_container_width=True):
+    if chat_head_col2.button("🗑️ Limpar"):
         st.session_state.history = []
         st.session_state.status = None
         st.session_state.context_start_idx = 0
@@ -213,15 +213,23 @@ with col1:
     </div>
     """, unsafe_allow_html=True)
     
-    # Executa o script mirando exatamente na âncora criada
+    # Scroll automático — busca a caixa pelo ID e força scroll para o fim
     components.html(
         f"""
         <script>
-            const doc = window.parent.document;
-            const bottom = doc.getElementById('chat-bottom');
-            if (bottom) {{
-                bottom.scrollIntoView({{ behavior: 'smooth', block: 'end' }});
+            function doScroll() {{
+                const doc = window.parent.document;
+                const box = doc.getElementById('chat-messages-box');
+                if (box) {{
+                    box.scrollTop = box.scrollHeight;
+                }} else {{
+                    const bottom = doc.getElementById('chat-bottom');
+                    if (bottom) bottom.scrollIntoView({{ behavior: 'smooth', block: 'end' }});
+                }}
             }}
+            // Tenta imediatamente e depois mais uma vez após render
+            doScroll();
+            setTimeout(doScroll, 300);
         </script>
         """,
         height=0, width=0
@@ -340,8 +348,9 @@ st.markdown('<p style="text-align: center; font-size: 0.8rem; color: #888;">Cliq
 # ─── RODAPÉ PROFISSIONAL ───
 st.markdown("""
 <div style="text-align: center; margin-top: 60px; padding-top: 20px; border-top: 1px solid #1a3c54;">
-    <p style="color: #888; font-size: 0.85rem; font-family: monospace;">
-        &lt;/&gt; Sistema de Triagem Automatizada | Desenvolvido por <b>Emmanuel</b> | <a href="https://github.com/kubiszevski/embalagio-atendimento/blob/main/README.md" target="_blank" style="color: #FF6A00; text-decoration: none; font-weight: bold;">📖 Ver Documentação (README)</a>
+    <p style="color: #888; font-size: 0.85rem; font-family: monospace; margin-bottom: 8px;">
+        &lt;/&gt; Sistema de Triagem Automatizada | Desenvolvido por <b style="color: #aaa;">Emmanuel</b>
     </p>
+    <a href="https://github.com/kubiszevski/embalagio-atendimento/blob/main/README.md" target="_blank" style="color: #aaa; text-decoration: none; font-size: 0.8rem; font-family: monospace; border: 1px solid #444; padding: 4px 12px; border-radius: 6px; transition: all 0.2s;">📖 Ver Documentação (README)</a>
 </div>
 """, unsafe_allow_html=True)
