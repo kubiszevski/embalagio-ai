@@ -2,8 +2,8 @@ import streamlit as st
 import requests
 import base64
 
-WEBHOOK_URL = "https://n8n-production-adc8.up.railway.app/webhook/embalagio-atendimento"
-SHEET_EMBED  = "https://docs.google.com/spreadsheets/d/1QcAuW2CIVvVv03asnwpj32AvT6rXKV9FXwLdSHXWhiw/edit?usp=sharing"
+WEBHOOK_URL = "[https://n8n-production-adc8.up.railway.app/webhook/embalagio-atendimento](https://n8n-production-adc8.up.railway.app/webhook/embalagio-atendimento)"
+SHEET_EMBED  = "[https://docs.google.com/spreadsheets/d/1QcAuW2CIVvVv03asnwpj32AvT6rXKV9FXwLdSHXWhiw/edit?usp=sharing](https://docs.google.com/spreadsheets/d/1QcAuW2CIVvVv03asnwpj32AvT6rXKV9FXwLdSHXWhiw/edit?usp=sharing)"
 
 st.set_page_config(page_title="Embalagio CRM", page_icon="📦", layout="wide")
 
@@ -53,8 +53,8 @@ button[kind="secondary"]:hover {{
     color: #FF6A00 !important;
 }}
 
-/* Forçar legibilidade no Popover */
-div[data-testid="stPopoverBody"] * {{
+/* Forçar legibilidade no Popover e Expander */
+div[data-testid="stPopoverBody"] *, div[data-testid="stExpanderDetails"] * {{
     color: #333333 !important;
 }}
 
@@ -91,7 +91,8 @@ div[data-testid="stPopoverBody"] * {{
 .chat-messages {{ flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; }}
 .msg-user {{ display: flex; justify-content: flex-end; }}
 .msg-ai   {{ display: flex; justify-content: flex-start; }}
-.bubble {{ max-width: 85%; padding: 10px 14px; font-size: 0.95rem; line-height: 1.4; word-break: normal; overflow-wrap: break-word; font-family: sans-serif; }}.bubble-user {{ background: #005c4b !important; color: #e9edef !important; border-radius: 12px 4px 12px 12px; }}
+.bubble {{ max-width: 85%; padding: 10px 14px; font-size: 0.95rem; line-height: 1.4; word-break: normal; overflow-wrap: break-word; font-family: sans-serif; }}
+.bubble-user {{ background: #005c4b !important; color: #e9edef !important; border-radius: 12px 4px 12px 12px; }}
 .bubble-ai {{ background: #202c33 !important; color: #e9edef !important; border-radius: 4px 12px 12px 12px; }}
 .bubble-label {{ color: #8696a0 !important; font-size: 0.7rem; font-family: monospace; margin-bottom: 4px;}}
 .chat-empty {{ color: #8696a0 !important; text-align: center; font-family: monospace; font-size: 0.85rem; margin-top: auto; margin-bottom: auto; }}
@@ -123,7 +124,7 @@ if "history" not in st.session_state:
 if "status" not in st.session_state:
     st.session_state.status = None
 if "context_start_idx" not in st.session_state:
-    st.session_state.context_start_idx = 0 # NOVO: Controla de onde a IA começa a ler
+    st.session_state.context_start_idx = 0
 
 def check_n8n():
     try:
@@ -171,7 +172,7 @@ with st.popover("ℹ️ Sobre este Projeto"):
         A IA interpreta a mensagem, extrai os itens do pedido e salva automaticamente no CRM, confirmando a solicitação com o cliente.</p>
         <p><b>Como Testar:</b></p>
         <ol style="margin-top: 0;">
-            <li>Escolha um exemplo no menu suspenso ou digite seu pedido.</li>
+            <li>Expanda os níveis de teste ou digite seu pedido.</li>
             <li>Clique em <b>ENVIAR MENSAGEM</b>.</li>
             <li>A IA registrará os dados e responderá instantaneamente.</li>
         </ol>
@@ -189,11 +190,12 @@ with col1:
     if chat_head_col2.button("🗑️ Limpar", use_container_width=True):
         st.session_state.history = []
         st.session_state.status = None
+        st.session_state.context_start_idx = 0
         st.rerun()
 
     msgs_html = ''
     if not st.session_state.history:
-        msgs_html = '<div class="chat-empty">Nenhuma mensagem ainda.<br/>Selecione um pedido ou digite abaixo ↓</div>'
+        msgs_html = '<div class="chat-empty">Nenhuma mensagem ainda.<br/>Selecione um nível de teste ou digite abaixo ↓</div>'
     else:
         for m in st.session_state.history:
             if m["role"] == "user":
@@ -216,35 +218,41 @@ with col1:
     st.markdown(f'<div class="chat-panel"><div class="chat-messages">{msgs_html}</div></div>', unsafe_allow_html=True)
 
     st.write("")
-    opcoes_exemplos = [
-        "Escolha um pedido rápido (Opcional):",
-        "Oi, quero orçar 1000 caixas de hambúrguer tamanho G.",
-        "Me chamo Ana. Preciso de 500 sacolas kraft P para minha loja.",
-        "Olá! Quero pedir 300 caixas de pizza personalizadas, sou o Marcos.",
-        "Bom dia. Queremos 2000 sacos de papel para pão. Aqui é a padaria Doce Pão."
-    ]
-    escolha = st.selectbox("💡 Sugestões:", opcoes_exemplos)
     
-    # Gerenciamento de estado para limpar o input
-    if "input_texto" not in st.session_state:
-        st.session_state.input_texto = ""
+    # --- NOVO SISTEMA DE TESTES (4 NÍVEIS) ---
+    with st.expander("🧪 Níveis de Teste da IA (Clique para expandir)"):
+        st.markdown("<p style='font-size: 0.85rem; color: #888;'>Testes criados para desafiar o modelo de linguagem e as regras de negócio.</p>", unsafe_allow_html=True)
         
-    def limpar_input():
-        st.session_state.input_texto = ""
+        testes = [
+            ("Nível 1: Direto", "Oi, sou o Marcos. Preciso de 500 caixas de pizza G.", "Testa se a IA extrai tudo de primeira e já fecha o lead."),
+            ("Nível 2: Faltam Dados", "Quero 1000 sacos kraft.", "Força a IA a identificar a falta do nome e perguntar humanamente."),
+            ("Nível 3: Inferência", "Me chamo Ana. Preciso de 200 potes plásticos para salada.", "Testa se a IA enquadra potes em 'Diversos' silenciosamente."),
+            ("Nível 4: Alta Qtd", "Bom dia. Queremos 5000 sacos de papel para pão. Aqui é a padaria Doce Pão.", "Aciona a regra de segurança: a IA deve pedir confirmação por ser > 1000.")
+        ]
+        
+        for nome, msg_teste, desc in testes:
+            col_btn, col_desc = st.columns([1, 2.5], vertical_alignment="center")
+            # Ao clicar, atualizamos a variável caixa_texto no session_state
+            if col_btn.button(f"Carregar {nome}", key=f"btn_{nome}", use_container_width=True):
+                st.session_state.caixa_texto = msg_teste
+            col_desc.markdown(f"<span style='font-size: 0.85rem; color: #60a5fa;'>💡 <b>Objetivo:</b> {desc}</span>", unsafe_allow_html=True)
+            
+    # --- CAIXA DE TEXTO COM GERENCIAMENTO DE ESTADO ---
+    if "caixa_texto" not in st.session_state:
+        st.session_state.caixa_texto = ""
 
-    # Se o usuário escolher um exemplo, joga pra variável
-    texto_atual = escolha if escolha != opcoes_exemplos[0] else st.session_state.input_texto
-
-    user_input = st.text_area("Sua mensagem:", value=texto_atual, height=80, placeholder="Digite seu pedido aqui...", key="caixa_texto")
+    # Usamos st.session_state.caixa_texto como a key, ligando o widget à variável global
+    user_input = st.text_area("Sua mensagem:", key="caixa_texto", height=80, placeholder="Digite seu pedido aqui...")
 
     if st.button("ENVIAR MENSAGEM ➜", use_container_width=True):
-        if user_input.strip():
-            st.session_state.history.append({"role": "user", "text": user_input.strip()})
+        msg = st.session_state.caixa_texto.strip()
+        if msg:
+            st.session_state.history.append({"role": "user", "text": msg})
             
             with st.spinner("Processando Inteligência Artificial..."):
                 try:
                     historico_ativo = st.session_state.history[st.session_state.context_start_idx:]
-                    payload = {"message": user_input.strip(), "history": historico_ativo}
+                    payload = {"message": msg, "history": historico_ativo}
                     r = requests.post(WEBHOOK_URL, json=payload, timeout=45)
                     
                     if r.status_code == 200:
@@ -268,8 +276,8 @@ with col1:
                 except Exception as e:
                     st.session_state.status = ("err", "Sistema Offline ou Falha na Conexão.")
             
-            # Limpa o texto usando a função callback e recarrega
-            limpar_input()
+            # Esvazia a caixa de texto e recarrega a página instantaneamente
+            st.session_state.caixa_texto = ""
             st.rerun()
         else:
             st.warning("A mensagem não pode estar vazia.")
