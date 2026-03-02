@@ -246,6 +246,7 @@ with col1:
                     
                     if r.status_code == 200:
                         import re
+                        import json
                         raw_text = r.text
                         
                         try:
