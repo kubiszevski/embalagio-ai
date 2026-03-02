@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import base64
 
-WEBHOOK_URL  = "https://n8n-production-adc8.up.railway.app/webhook/embalagio-atendimento"
+WEBHOOK_URL = "https://n8n-production-adc8.up.railway.app/webhook/embalagio-atendimento"
 SHEET_EMBED  = "https://docs.google.com/spreadsheets/d/1QcAuW2CIVvVv03asnwpj32AvT6rXKV9FXwLdSHXWhiw/edit?usp=sharing"
 
 st.set_page_config(page_title="Embalagio CRM", page_icon="📦", layout="wide")
@@ -42,19 +42,8 @@ h1, h2, h3, h4, p, label, li, span {{ color: #f0f0f0; }}
     background: #FF7A1A !important; 
 }}
 
-/* Botões Secundários */
-button[kind="secondary"] {{
-    background-color: transparent !important;
-    color: #f0f0f0 !important;
-    border: 1px solid #FF6A00 !important;
-}}
-button[kind="secondary"]:hover {{
-    background-color: #0E2A3A !important;
-    color: #FF6A00 !important;
-}}
-
-/* Forçar legibilidade no Popover e Expander */
-div[data-testid="stPopoverBody"] *, div[data-testid="stExpanderDetails"] * {{
+/* Forçar legibilidade no Popover */
+div[data-testid="stPopoverBody"] * {{
     color: #333333 !important;
 }}
 
@@ -119,34 +108,27 @@ div[data-testid="stPopoverBody"] *, div[data-testid="stExpanderDetails"] * {{
 </style>
 """, unsafe_allow_html=True)
 
+# ─── GERENCIAMENTO DE ESTADO ───
 if "history" not in st.session_state:
     st.session_state.history = []
 if "status" not in st.session_state:
     st.session_state.status = None
 if "context_start_idx" not in st.session_state:
     st.session_state.context_start_idx = 0
+if "caixa_texto" not in st.session_state:
+    st.session_state.caixa_texto = ""
+if "texto_enviado" not in st.session_state:
+    st.session_state.texto_enviado = ""
 
 def check_n8n():
     try:
         r = requests.post(WEBHOOK_URL, json={"message": "__ping__", "history": []}, timeout=4)
-        if r.status_code == 200:
-            return True
-        return False
+        return r.status_code == 200
     except:
         return False
 
 n8n_online = check_n8n()
-
-if n8n_online:
-    badge_bg = "#0d2b1a"
-    badge_border = "#1a5c35"
-    badge_color = "#4ade80"
-    badge_text  = "● SISTEMA ATIVO"
-else:
-    badge_bg = "#2b0d0d"
-    badge_border = "#5c1a1a"
-    badge_color = "#f87171"
-    badge_text  = "○ SISTEMA OFFLINE"
+badge_bg, badge_border, badge_color, badge_text = ("#0d2b1a", "#1a5c35", "#4ade80", "● SISTEMA ATIVO") if n8n_online else ("#2b0d0d", "#5c1a1a", "#f87171", "○ SISTEMA OFFLINE")
 
 # ─── CABEÇALHO ───
 st.markdown(f"""
@@ -167,15 +149,10 @@ st.markdown(f"""
 with st.popover("ℹ️ Sobre este Projeto"):
     st.markdown("""
     <div style="color: #333333; font-family: sans-serif; font-size: 0.95rem;">
-        <h3 style="color: #FF6A00; margin-top: 0;">📦 Embalagio IA - Atendimento & CRM</h3>
-        <p>Sistema inteligente que simula o atendimento automatizado de uma franquia via WhatsApp. 
-        A IA interpreta a mensagem, extrai os itens do pedido e salva automaticamente no CRM, confirmando a solicitação com o cliente.</p>
-        <p><b>Como Testar:</b></p>
-        <ol style="margin-top: 0;">
-            <li>Expanda os níveis de teste ou digite seu pedido.</li>
-            <li>Clique em <b>ENVIAR MENSAGEM</b>.</li>
-            <li>A IA registrará os dados e responderá instantaneamente.</li>
-        </ol>
+        <h3 style="color: #FF6A00; margin-top: 0; margin-bottom: 10px;">📦 Embalagio IA - Triagem & CRM</h3>
+        <p style="margin-bottom: 10px;">O <b>Embalagio IA</b> é um assistente virtual autônomo focado na qualificação de leads B2B/B2C. Utilizando LLMs de baixa latência (Llama 3.3 via Groq) integrados ao n8n, ele atua no topo do funil de vendas simulando o WhatsApp.</p>
+        <p style="margin-bottom: 10px;">Ele interpreta intenções não estruturadas de clientes, extrai dados essenciais (Nome, Categoria e Quantidade) lidando com falhas na comunicação humana, e alimenta um CRM em tempo real. Isso elimina fricções operacionais e garante que a equipe comercial receba leads altamente qualificados.</p>
+        <p style="font-size: 0.85rem; border-top: 1px solid #ccc; padding-top: 10px;">Desenvolvido com Python, Streamlit, n8n, Groq API e Google Sheets.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -191,68 +168,73 @@ with col1:
         st.session_state.history = []
         st.session_state.status = None
         st.session_state.context_start_idx = 0
+        st.session_state.caixa_texto = ""
         st.rerun()
 
     msgs_html = ''
     if not st.session_state.history:
-        msgs_html = '<div class="chat-empty">Nenhuma mensagem ainda.<br/>Selecione um nível de teste ou digite abaixo ↓</div>'
+        msgs_html = '<div class="chat-empty">Nenhuma mensagem ainda.<br/>Selecione um pedido ou digite abaixo ↓</div>'
     else:
         for m in st.session_state.history:
             if m["role"] == "user":
-                msgs_html += f'''
-                <div class="msg-user">
-                  <div>
-                    <div class="bubble-label bubble-label-right">Você</div>
-                    <div class="bubble bubble-user"><p style="margin:0;">{m["text"]}</p></div>
-                  </div>
-                </div>'''
+                msgs_html += f'<div class="msg-user"><div><div class="bubble-label bubble-label-right">Você</div><div class="bubble bubble-user"><p style="margin:0;">{m["text"]}</p></div></div></div>'
             else:
-                msgs_html += f'''
-                <div class="msg-ai">
-                  <div>
-                    <div class="bubble-label">🤖 Embalagio IA</div>
-                    <div class="bubble bubble-ai"><p style="margin:0;">{m["text"]}</p></div>
-                  </div>
-                </div>'''
+                msgs_html += f'<div class="msg-ai"><div><div class="bubble-label">🤖 Embalagio IA</div><div class="bubble bubble-ai"><p style="margin:0;">{m["text"]}</p></div></div></div>'
 
     st.markdown(f'<div class="chat-panel"><div class="chat-messages">{msgs_html}</div></div>', unsafe_allow_html=True)
-
     st.write("")
     
-# --- NOVO SISTEMA DE TESTES (4 NÍVEIS) ---
-    with st.expander("🧪 Níveis de Teste da IA (Clique para expandir)"):
-        st.markdown("<p style='font-size: 0.85rem; color: #888;'>Testes criados para desafiar o modelo de linguagem e as regras de negócio.</p>", unsafe_allow_html=True)
-        
-        testes = [
-            ("Nível 1: Direto", "Oi, sou o Marcos. Preciso de 500 caixas de pizza G.", "Testa se a IA extrai tudo de primeira e já fecha o lead."),
-            ("Nível 2: Faltam Dados", "Quero 1000 sacos kraft.", "Força a IA a identificar a falta do nome e perguntar humanamente."),
-            ("Nível 3: Inferência", "Me chamo Ana. Preciso de 200 potes plásticos para salada.", "Testa se a IA enquadra potes em 'Diversos' silenciosamente."),
-            ("Nível 4: Alta Qtd", "Bom dia. Queremos 5000 sacos de papel para pão. Aqui é a padaria Doce Pão.", "Aciona a regra de segurança: a IA deve pedir confirmação por ser > 1000.")
-        ]
-        
-        for nome, msg_teste, desc in testes:
-            col_btn, col_desc = st.columns([1, 2.5], vertical_alignment="center")
-            if col_btn.button(f"Carregar {nome}", key=f"btn_{nome}", use_container_width=True):
-                st.session_state.caixa_texto = msg_teste
-            col_desc.markdown(f"<span style='font-size: 0.85rem; color: #60a5fa;'>💡 <b>Objetivo:</b> {desc}</span>", unsafe_allow_html=True)
-            
-    # --- CAIXA DE TEXTO COM GERENCIAMENTO DE ESTADO ---
-    if "caixa_texto" not in st.session_state:
-        st.session_state.caixa_texto = ""
-    if "texto_enviado" not in st.session_state:
-        st.session_state.texto_enviado = ""
+    # --- NOVO MENU DE TESTES COM SELECTBOX ---
+    testes_opcoes = {
+        "-- Digite livremente ou escolha um cenário de teste --": {"msg": "", "desc": ""},
+        "Nível 1: Pedido Direto": {
+            "msg": "Oi, sou o Marcos. Preciso de 500 caixas de pizza G.", 
+            "desc": "Testa se a IA extrai todos os dados de primeira, classificando a intenção e salvando o lead sem perguntas adicionais."
+        },
+        "Nível 2: Dados Faltantes": {
+            "msg": "Quero 1000 sacos kraft.", 
+            "desc": "Força a IA a reter o envio ao CRM e fazer uma pergunta humanizada solicitando o nome faltante."
+        },
+        "Nível 3: Inferência de Categoria": {
+            "msg": "Me chamo Ana. Preciso de 200 potes plásticos para salada.", 
+            "desc": "Testa se a IA enquadra um produto fora do padrão (potes plásticos) na categoria genérica 'Diversos' silenciosamente."
+        },
+        "Nível 4: Regra de Alta Quantidade": {
+            "msg": "Bom dia. Queremos 5000 sacos de papel para pão. Aqui é a padaria Doce Pão.", 
+            "desc": "Aciona a regra de negócio de segurança: a IA deve segurar o lead e pedir que o cliente confirme se realmente deseja essa alta quantidade (>1000)."
+        }
+    }
+
+    # Callback para atualizar a caixa de texto quando selecionar um item
+    def on_select_change():
+        escolha = st.session_state.seletor_teste
+        if escolha != "-- Digite livremente ou escolha um cenário de teste --":
+            st.session_state.caixa_texto = testes_opcoes[escolha]["msg"]
+
+    escolha_atual = st.selectbox(
+        "💡 Sugestões de pedidos rápidos:", 
+        list(testes_opcoes.keys()), 
+        key="seletor_teste", 
+        on_change=on_select_change
+    )
+
+    # O Pop-up contextual em formato de card
+    if escolha_atual != "-- Digite livremente ou escolha um cenário de teste --":
+        st.markdown(f"""
+        <div style="background-color: #0d212e; border-left: 4px solid #FF6A00; padding: 12px; margin-bottom: 15px; border-radius: 0 8px 8px 0;">
+            <span style="color: #FF6A00; font-size: 0.8rem; font-family: monospace; font-weight: bold; text-transform: uppercase;">Objetivo do Teste</span><br>
+            <span style="font-size: 0.85rem; color: #d1d5db;">{testes_opcoes[escolha_atual]['desc']}</span>
+        </div>
+        """, unsafe_allow_html=True)
 
     def preparar_envio():
-        # Copia o que o usuário digitou para enviar ao n8n e limpa a caixa instantaneamente
         st.session_state.texto_enviado = st.session_state.caixa_texto
         st.session_state.caixa_texto = ""
 
     st.text_area("Sua mensagem:", key="caixa_texto", height=80, placeholder="Digite seu pedido aqui...")
 
-    # O botão chama a função preparar_envio ANTES de descer para o código
     if st.button("ENVIAR MENSAGEM ➜", use_container_width=True, on_click=preparar_envio):
         msg = st.session_state.texto_enviado.strip()
-        
         if msg:
             st.session_state.history.append({"role": "user", "text": msg})
             
@@ -275,18 +257,19 @@ with col1:
                             else: 
                                 st.session_state.status = ("ok", "Lead qualificado e salvo no CRM!")
                                 st.session_state.context_start_idx = len(st.session_state.history)
-                                
                         except ValueError:
                             st.session_state.status = ("err", "Erro: n8n não retornou JSON válido.")
                     else:
                         st.session_state.status = ("err", f"Erro de comunicação: {r.status_code}")
                 except Exception as e:
                     st.session_state.status = ("err", "Sistema Offline ou Falha na Conexão.")
-                    
-            # Removido o st.session_state.caixa_texto = "" e o st.rerun() daqui!
+            
+            # Recarrega a tela IMEDIATAMENTE após a IA responder, atualizando o painel de chat
+            st.rerun()
         else:
             st.warning("A mensagem não pode estar vazia.")
-    # Feedback visual dinâmico abaixo do botão
+
+    # Feedback visual dinâmico
     if st.session_state.status:
         t, msg = st.session_state.status
         if t == "ok":
