@@ -246,7 +246,15 @@ with col1:
                     
                     if r.status_code == 200:
                         try:
-                            data = r.json()
+                            # Pegamos o texto bruto primeiro para tratar sujeiras de Markdown
+                            raw_response = r.text
+                            
+                            # Limpeza de blocos de código Markdown que modelos menores costumam enviar
+                            clean_response = raw_response.replace("```json", "").replace("```", "").strip()
+                            
+                            import json
+                            data = json.loads(clean_response)
+                            
                             reply = data.get("Reply", data.get("reply", "Desculpe, não entendi."))
                             status_ia = data.get("Status", data.get("status", "Complete"))
                             
@@ -257,8 +265,9 @@ with col1:
                             else: 
                                 st.session_state.status = ("ok", "Lead qualificado e salvo no CRM!")
                                 st.session_state.context_start_idx = len(st.session_state.history)
-                        except ValueError:
-                            st.session_state.status = ("err", "Erro: n8n não retornou JSON válido.")
+                                
+                        except Exception as e:
+                            st.session_state.status = ("err", f"Erro ao processar JSON: {str(e)}")
                     else:
                         st.session_state.status = ("err", f"Erro de comunicação: {r.status_code}")
                 except Exception as e:
