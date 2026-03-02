@@ -3,7 +3,6 @@ import requests
 import base64
 
 WEBHOOK_URL = "https://n8n-production-adc8.up.railway.app/webhook/embalagio-atendimento"
-# Adicionado '&rm=minimal' no final para esconder menus do Google Sheets
 SHEET_EMBED  = "https://docs.google.com/spreadsheets/d/1QcAuW2CIVvVv03asnwpj32AvT6rXKV9FXwLdSHXWhiw/edit?usp=sharing&rm=minimal"
 
 st.set_page_config(page_title="Embalagio CRM", page_icon="📦", layout="wide")
@@ -17,10 +16,8 @@ def get_img_as_base64(file_path):
 
 logo_b64 = get_img_as_base64("logo_embalagio.png")
 
-# CSS ATUALIZADO (Inclusão de regras para esconder menus do Streamlit)
 st.markdown(f"""
 <style>
-/* Esconder menu padrão do Streamlit e marca d'água no rodapé para o vídeo */
 #MainMenu {{ visibility: hidden; }}
 footer {{ visibility: hidden; }}
 header {{ visibility: hidden; }}
@@ -60,37 +57,14 @@ button[kind="secondary"]:hover {{
     background: transparent !important;
 }}
 
-div[data-testid="stPopoverBody"] * {{
-    color: #333333 !important;
-}}
+div[data-testid="stPopoverBody"] * {{ color: #333333 !important; }}
 
-.stSelectbox div[data-baseweb="select"] {{ 
-    border-color: #FF6A00 !important; 
-    background-color: #0E2A3A !important; 
-    color: #f0f0f0 !important; 
-}}
-.stTextArea textarea {{ 
-    border-color: #FF6A00 !important; 
-    background-color: #0E2A3A !important; 
-    color: #f0f0f0 !important; 
-}}
+.stSelectbox div[data-baseweb="select"] {{ border-color: #FF6A00 !important; background-color: #0E2A3A !important; color: #f0f0f0 !important; }}
+.stTextArea textarea {{ border-color: #FF6A00 !important; background-color: #0E2A3A !important; color: #f0f0f0 !important; }}
 
-.stSelectbox div[data-baseweb="select"]:focus-within, 
-.stTextArea textarea:focus {{
-    box-shadow: 0 0 0 2px #FF6A00 !important;
-    outline: none !important;
-}}
+.stSelectbox div[data-baseweb="select"]:focus-within, .stTextArea textarea:focus {{ box-shadow: 0 0 0 2px #FF6A00 !important; outline: none !important; }}
 
-.chat-panel {{ 
-    background-color: #0E2A3A; 
-    border: 1px solid #FF6A00; 
-    border-radius: 12px; 
-    padding: 15px; 
-    height: 400px; 
-    display: flex; 
-    flex-direction: column; 
-}}
-
+.chat-panel {{ background-color: #0E2A3A; border: 1px solid #FF6A00; border-radius: 12px; padding: 15px; height: 400px; display: flex; flex-direction: column; }}
 .chat-messages {{ flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 12px; }}
 .msg-user {{ display: flex; justify-content: flex-end; }}
 .msg-ai   {{ display: flex; justify-content: flex-start; }}
@@ -99,7 +73,6 @@ div[data-testid="stPopoverBody"] * {{
 .bubble-ai {{ background: #202c33 !important; color: #e9edef !important; border-radius: 4px 12px 12px 12px; }}
 .bubble-label {{ color: #8696a0 !important; font-size: 0.7rem; font-family: monospace; margin-bottom: 4px;}}
 .chat-empty {{ color: #8696a0 !important; text-align: center; font-family: monospace; font-size: 0.85rem; margin-top: auto; margin-bottom: auto; }}
-
 .block-container {{ padding-top: 1rem !important; max-width: 1400px; }}
 
 .header-container {{
@@ -110,6 +83,15 @@ div[data-testid="stPopoverBody"] * {{
 .header-logo {{ width: 140px; border-radius: 8px; }}
 .header-title-box h1 {{ color: #FF6A00; font-size: 1.5rem; margin: 0; font-weight: 900; line-height: 1.2; }}
 .header-title-box p {{ color: #888; font-size: 0.85rem; margin: 0; font-family: monospace; }}
+
+/* AJUSTES PARA MOBILE */
+@media (max-width: 768px) {{
+    .header-container {{ flex-direction: column; align-items: center; text-align: center; gap: 15px; }}
+    .header-left {{ flex-direction: column; align-items: center; gap: 10px; }}
+    .header-logo {{ width: 100px; }}
+    .header-title-box h1 {{ font-size: 1.3rem; }}
+    .header-title-box p {{ font-size: 0.75rem; }}
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -127,7 +109,7 @@ if "texto_enviado" not in st.session_state:
 @st.cache_data(ttl=30)
 def check_n8n():
     try:
-        r = requests.post(WEBHOOK_URL, json={"message": "__ping__", "history": []}, timeout=4)
+        r = requests.post(WEBHOOK_URL, json={"message": "__ping__", "history": ""}, timeout=4)
         return r.status_code == 200
     except:
         return False
@@ -135,7 +117,6 @@ def check_n8n():
 n8n_online = check_n8n()
 badge_bg, badge_border, badge_color, badge_text = ("#0d2b1a", "#1a5c35", "#4ade80", "● SISTEMA ATIVO") if n8n_online else ("#2b0d0d", "#5c1a1a", "#f87171", "○ SISTEMA OFFLINE")
 
-# Bolha aumentada (padding 8px 18px e font-size 0.85rem)
 st.markdown(f"""
 <div class="header-container">
     <div class="header-left">
@@ -151,7 +132,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Popover limpo: O Streamlit fecha automaticamente ao clicar fora
 with st.popover("ℹ️ Sobre este Projeto"):
     st.markdown("""
     <div style="color: #333333; font-family: sans-serif; font-size: 0.95rem; padding: 5px;">
@@ -164,14 +144,14 @@ with st.popover("ℹ️ Sobre este Projeto"):
 
 st.write("")
 
-# Ajuste da proporção para caber as 4 colunas da planilha (1 vs 1.8)
-col1, col2 = st.columns([1, 1.8], gap="large")
+# AJUSTE 1: Colunas de [1, 1.8] para [1, 2.2] para dar mais espaço à planilha
+col1, col2 = st.columns([1, 2.2], gap="large")
 
 with col1:
-    chat_head_col1, chat_head_col2 = st.columns([5, 1.5], vertical_alignment="center")
-    chat_head_col1.markdown('<p class="brand-text" style="font-family: monospace; font-weight: bold; text-transform: uppercase; margin: 0;">💬 Chat de Atendimento</p>', unsafe_allow_html=True)
+    # AJUSTE 3: Alinhamento vertical ajustado para "bottom" para alinhar o título com o botão
+    chat_head_col1, chat_head_col2 = st.columns([5, 1.5], vertical_alignment="bottom")
+    chat_head_col1.markdown('<p class="brand-text" style="font-family: monospace; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0;">💬 Chat de Atendimento</p>', unsafe_allow_html=True)
     
-    # Botão de limpar menor e com emoji
     if chat_head_col2.button("🗑️ Limpar", type="secondary", use_container_width=True):
         st.session_state.history = []
         st.session_state.status = None
@@ -199,7 +179,6 @@ with col1:
     
     st.write("")
     
-    # Textos do menu sem os "--"
     testes_opcoes = {
         "Digite livremente ou escolha um cenário de teste": {"msg": "", "desc": ""},
         "Pedido Direto (Fluxo Ideal)": {
@@ -254,7 +233,15 @@ with col1:
             with st.spinner("Processando Inteligência Artificial..."):
                 try:
                     historico_ativo = st.session_state.history[st.session_state.context_start_idx:]
-                    payload = {"message": msg, "history": historico_ativo}
+                    
+                    # AJUSTE: Concatenando o histórico em uma única string de texto para facilitar para o n8n
+                    conversa_texto = ""
+                    for h in historico_ativo:
+                        ator = "Cliente" if h["role"] == "user" else "Assistente"
+                        conversa_texto += f"{ator}: {h['text']}\n"
+                    
+                    # Enviamos o bloco de texto inteiro na variável 'history'
+                    payload = {"message": msg, "history": conversa_texto}
                     r = requests.post(WEBHOOK_URL, json=payload, timeout=45)
                     
                     if r.status_code == 200:
