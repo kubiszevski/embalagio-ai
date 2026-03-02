@@ -223,37 +223,25 @@ with col1:
             "msg": "", 
             "desc": ""
         },
-        "Pedido Direto (Fluxo Ideal)": {
+        "Atendimento Inicial": {
+            "msg": "Bom dia! Tudo bem com vocês?", 
+            "desc": "Testa a recepção humanizada e a capacidade do assistente em solicitar proativamente os dados necessários para o pedido."
+        },
+        "Pedido de Caixas de Pizza": {
             "msg": "Oi, sou o Marcos. Preciso de 500 caixas de pizza G.", 
-            "desc": "Testa a extração imediata dos 3 dados fundamentais (Nome, Produto e Quantidade) em um único passo."
+            "desc": "Valida a extração imediata de nome, categoria e quantidade específica em uma única interação."
         },
-        "Apenas Saudação": {
-            "msg": "Bom dia! Tudo bem?", 
-            "desc": "Testa se o assistente inicia o atendimento de forma humanizada e solicita as informações necessárias para o pedido."
-        },
-        "Dados Faltantes: Nome": {
-            "msg": "Quero 1000 sacos kraft.", 
-            "desc": "Valida se o sistema identifica o interesse no produto, mas aguarda a identificação do cliente antes de registrar o lead."
-        },
-        "Dados Faltantes: Quantidade": {
-            "msg": "Olá, meu nome é Júlia. Vocês vendem sacolas de papel?", 
-            "desc": "Verifica se a inteligência reconhece o item desejado, mas solicita o volume de compra antes de finalizar."
-        },
-        "Categorização Simples": {
-            "msg": "Me chamo Ana. Preciso de 200 potes plásticos.", 
-            "desc": "Avalia a precisão do bot em capturar o nome e o item de interesse de forma direta e sem ruídos."
-        },
-        "Correção de Quantidade": {
+        "Ajuste de Pedido em Tempo Real": {
             "msg": "Sou o Carlos. Quero 100 caixas de bolo. Pensando bem, altera para 350 por favor.", 
-            "desc": "Testa a capacidade da IA em entender mudanças de decisão durante a conversa e registrar apenas o valor final."
+            "desc": "Avalia a inteligência do bot em processar mudanças de decisão durante a conversa e registrar apenas o dado final corrigido."
         },
-        "Alta Quantidade (>1000)": {
-            "msg": "Bom dia. Queremos 5000 sacos de papel para pão. Aqui é a padaria Doce Pão.", 
-            "desc": "Aciona o protocolo de segurança para volumes elevados, exigindo uma confirmação explícita do cliente."
-        },
-        "Fora de Escopo (Filtro)": {
+        "Filtro de Segurança e Escopo": {
             "msg": "Boa tarde, sou o Pedro. Vocês consertam impressoras?", 
-            "desc": "Testa o filtro de segurança que ignora solicitações que não pertencem ao catálogo de produtos da empresa."
+            "desc": "Verifica se o sistema identifica e bloqueia solicitações fora do catálogo de produtos, mantendo o CRM limpo de dados irrelevantes."
+        },
+        "Pedido Corporativo Complexo": {
+            "msg": "Olá, aqui é a Renata do Buffet Real. Para o evento de sábado, vamos precisar de 3000 mini embalagens kraft para doces finos. Pode confirmar esse volume pra mim?", 
+            "desc": "O teste definitivo: avalia a extração de nomes compostos, limpeza de especificações técnicas e a trava de segurança para grandes volumes com confirmação integrada."
         }
     }
 
