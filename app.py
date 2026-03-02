@@ -37,6 +37,7 @@ h1, h2, h3, h4, p, label, li, span {{ color: #f0f0f0; }}
     text-transform: uppercase;
     margin: 0;
     font-size: 1.05rem;
+    padding-bottom: 10px;
 }}
 
 button[kind="primary"] {{ 
@@ -52,30 +53,21 @@ button[kind="primary"]:hover {{
     background: #FF7A1A !important; 
 }}
 
-/* Botão Limpar alinhado à direita de forma absoluta (Fixo no PC e Mobile) */
+/* Botão Limpar arrumado (Sem truques de position) */
 button[kind="secondary"] {{
     background: transparent !important;
     color: #8696a0 !important;
-    border: none !important;
-    box-shadow: none !important;
+    border: 1px solid #1a3c54 !important;
+    border-radius: 6px !important;
     font-size: 0.85rem !important;
-    padding: 0 !important;
+    padding: 5px 10px !important;
     min-height: 0 !important;
     height: auto !important;
-    position: absolute;
-    right: 0px;
-    top: -38px;
-    z-index: 100;
+    margin-bottom: 10px;
 }}
 button[kind="secondary"]:hover {{
     color: #f0f0f0 !important;
-    background: transparent !important;
-}}
-
-/* Zera a altura do container do botão para não empurrar o chat para baixo */
-div[data-testid="stButton"]:has(button[kind="secondary"]) {{
-    height: 0px;
-    margin: 0;
+    background: #1a3c54 !important;
 }}
 
 div[data-testid="stPopoverBody"] * {{ color: #333333 !important; }}
@@ -90,16 +82,17 @@ div[data-testid="stPopoverBody"] * {{ color: #333333 !important; }}
 .msg-user {{ display: flex; justify-content: flex-end; }}
 .msg-ai   {{ display: flex; justify-content: flex-start; }}
 
-/* Bolhas de chat com quebra de linha inteligente para não quebrar "Oi" */
+/* Bolhas de chat BLINDADAS contra quebra de palavras curtas */
 .bubble {{ 
     width: fit-content; 
     max-width: 85%; 
+    min-width: 40px;
     padding: 10px 14px; 
     font-size: 0.95rem; 
     line-height: 1.4; 
     white-space: pre-wrap; 
-    word-break: normal; 
-    overflow-wrap: break-word; 
+    word-break: normal !important; 
+    overflow-wrap: break-word !important; 
     font-family: sans-serif; 
 }}
 .bubble-user {{ background: #005c4b !important; color: #e9edef !important; border-radius: 12px 4px 12px 12px; }}
@@ -176,18 +169,21 @@ with st.popover("ℹ️ Sobre este Projeto"):
 
 st.write("")
 
-# Ajustado levemente a proporção para dar mais espaço ao chat no PC
+# Layout principal
 col1, col2 = st.columns([1.2, 2.2], gap="large")
 
 with col1:
-    st.markdown('<div style="position: relative; padding-bottom: 15px;"><p class="panel-title">💬 Chat de Atendimento</p></div>', unsafe_allow_html=True)
-    
-    if st.button("🗑️ Limpar", type="secondary"):
-        st.session_state.history = []
-        st.session_state.status = None
-        st.session_state.context_start_idx = 0
-        st.session_state.caixa_texto = ""
-        st.rerun()
+    # Cabeçalho do Chat usando colunas nativas para evitar quebras
+    chat_head_col1, chat_head_col2 = st.columns([4, 1.5], vertical_alignment="bottom")
+    with chat_head_col1:
+        st.markdown('<p class="panel-title">💬 Chat de Atendimento</p>', unsafe_allow_html=True)
+    with chat_head_col2:
+        if st.button("🗑️ Limpar", type="secondary", use_container_width=True):
+            st.session_state.history = []
+            st.session_state.status = None
+            st.session_state.context_start_idx = 0
+            st.session_state.caixa_texto = ""
+            st.rerun()
 
     chat_container = st.empty()
 
@@ -319,7 +315,7 @@ with col1:
             st.markdown(f'<div style="color: #f87171; font-family: monospace; font-size: 0.85rem; font-weight: bold; margin-top: 10px;">✗ {msg}</div>', unsafe_allow_html=True)
 
 with col2:
-    st.markdown('<div style="padding-bottom: 15px;"><p class="panel-title">📊 CRM — Leads em Tempo Real</p></div>', unsafe_allow_html=True)
+    st.markdown('<p class="panel-title">📊 CRM — Leads em Tempo Real</p>', unsafe_allow_html=True)
     st.markdown(
         f'<div style="background-color: #0E2A3A; border: 2px solid #FF6A00; border-radius: 12px; overflow: hidden; line-height: 0;"><iframe src="{SHEET_EMBED}" width="100%" height="600" frameborder="0" style="border-radius: 10px;"></iframe></div>',
         unsafe_allow_html=True
