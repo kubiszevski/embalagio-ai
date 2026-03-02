@@ -84,7 +84,6 @@ div[data-testid="stPopoverBody"] * {{ color: #333333 !important; }}
 .header-title-box h1 {{ color: #FF6A00; font-size: 1.5rem; margin: 0; font-weight: 900; line-height: 1.2; }}
 .header-title-box p {{ color: #888; font-size: 0.85rem; margin: 0; font-family: monospace; }}
 
-/* AJUSTES PARA MOBILE */
 @media (max-width: 768px) {{
     .header-container {{ flex-direction: column; align-items: center; text-align: center; gap: 15px; }}
     .header-left {{ flex-direction: column; align-items: center; gap: 10px; }}
@@ -144,74 +143,109 @@ with st.popover("ℹ️ Sobre este Projeto"):
 
 st.write("")
 
-# AJUSTE 1: Colunas de [1, 1.8] para [1, 2.2] para dar mais espaço à planilha
 col1, col2 = st.columns([1, 2.2], gap="large")
+
 with col1:
     chat_head_col1, chat_head_col2 = st.columns([5, 1.5], vertical_alignment="bottom")
     chat_head_col1.markdown('<p class="brand-text" style="font-family: monospace; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0;">💬 Chat de Atendimento</p>', unsafe_allow_html=True)
     
     if chat_head_col2.button("🗑️ Limpar", type="secondary", use_container_width=True):
-        st.session_state.history = []; st.session_state.status = None; st.session_state.context_start_idx = 0; st.session_state.caixa_texto = ""; st.rerun()
+        st.session_state.history = []
+        st.session_state.status = None
+        st.session_state.context_start_idx = 0
+        st.session_state.caixa_texto = ""
+        st.rerun()
 
-    # 1. CRIAMOS O PLACEHOLDER (Uma caixa vazia onde o chat vai ficar)
     chat_container = st.empty()
 
-    # 2. FUNÇÃO QUE DESENHA AS BOLHAS
     def renderizar_chat():
         msgs_html = ''
         if not st.session_state.history:
             msgs_html = '<div class="chat-empty">Nenhuma mensagem ainda.<br/>Selecione um cenário de teste ou digite abaixo ↓</div>'
         else:
             for m in st.session_state.history:
-                role_label = "Você" if m["role"] == "user" else "🤖 Embalagio IA"
-                bubble_class = "bubble-user" if m["role"] == "user" else "bubble-ai"
-                msg_class = "msg-user" if m["role"] == "user" else "msg-ai"
-                msgs_html += f'<div class="{msg_class}"><div><div class="bubble-label">{role_label}</div><div class="bubble {bubble_class}"><p style="margin:0;">{m["text"]}</p></div></div></div>'
-        return f'<div class="chat-panel"><div class="chat-messages">{msgs_html}</div></div>'
+                if m["role"] == "user":
+                    msgs_html += f'<div class="msg-user"><div><div class="bubble-label bubble-label-right" style="text-align: right;">Você</div><div class="bubble bubble-user"><p style="margin:0;">{m["text"]}</p></div></div></div>'
+                else:
+                    msgs_html += f'<div class="msg-ai"><div><div class="bubble-label">🤖 Embalagio IA</div><div class="bubble bubble-ai"><p style="margin:0;">{m["text"]}</p></div></div></div>'
+        return f'<div class="chat-panel"><div class="chat-messages" id="chat-messages-box">{msgs_html}</div></div>'
 
-    # 3. COLOCAMOS O CHAT DENTRO DA CAIXA
     chat_container.markdown(renderizar_chat(), unsafe_allow_html=True)
+    
     st.write("")
     
-    # ... (SEU SELETOR DE TESTES CONTINUA AQUI NORMALMENTE) ...
     testes_opcoes = {
         "Digite livremente ou escolha um cenário de teste": {"msg": "", "desc": ""},
-        "Pedido Direto (Fluxo Ideal)": {"msg": "Oi, sou o Marcos. Preciso de 500 caixas de pizza G.", "desc": "Teste de extração completa."},
-        "Dados Faltantes (Conversacional)": {"msg": "Quero 1000 sacos kraft.", "desc": "Teste de retenção por falta de nome."},
-        "Regra de Alta Quantidade (Segurança)": {"msg": "Bom dia. Queremos 5000 sacos de papel. Aqui é a padaria Doce Pão.", "desc": "Teste de trava > 1000."}
+        "Pedido Direto (Fluxo Ideal)": {
+            "msg": "Oi, sou o Marcos. Preciso de 500 caixas de pizza G.", 
+            "desc": "Testa se a IA extrai todos os dados de primeira, classificando a intenção e salvando o lead sem perguntas adicionais."
+        },
+        "Dados Faltantes (Conversacional)": {
+            "msg": "Quero 1000 sacos kraft.", 
+            "desc": "Força a IA a reter o envio ao CRM e fazer uma pergunta humanizada solicitando o nome faltante."
+        },
+        "Inferência de Categoria (Inteligência)": {
+            "msg": "Me chamo Ana. Preciso de 200 potes plásticos para salada.", 
+            "desc": "Testa se a IA enquadra um produto fora do padrão (potes plásticos) na categoria genérica 'Diversos' silenciosamente."
+        },
+        "Regra de Alta Quantidade (Segurança)": {
+            "msg": "Bom dia. Queremos 5000 sacos de papel para pão. Aqui é a padaria Doce Pão.", 
+            "desc": "Aciona a regra de negócio de segurança: a IA deve segurar o lead e pedir que o cliente confirme se realmente deseja essa alta quantidade (>1000)."
+        }
     }
 
     def on_select_change():
-        if st.session_state.seletor_teste != "Digite livremente ou escolha um cenário de teste":
-            st.session_state.caixa_texto = testes_opcoes[st.session_state.seletor_teste]["msg"]
+        escolha = st.session_state.seletor_teste
+        if escolha != "Digite livremente ou escolha um cenário de teste":
+            st.session_state.caixa_texto = testes_opcoes[escolha]["msg"]
 
-    st.selectbox("💡 Sugestões de pedidos rápidos:", list(testes_opcoes.keys()), key="seletor_teste", on_change=on_select_change)
+    escolha_atual = st.selectbox(
+        "💡 Sugestões de pedidos rápidos:", 
+        list(testes_opcoes.keys()), 
+        key="seletor_teste", 
+        on_change=on_select_change
+    )
+
+    if escolha_atual != "Digite livremente ou escolha um cenário de teste":
+        st.markdown(f"""
+        <div style="background-color: #0d212e; border-left: 4px solid #FF6A00; padding: 12px; margin-bottom: 15px; border-radius: 0 8px 8px 0;">
+            <span style="color: #FF6A00; font-size: 0.8rem; font-family: monospace; font-weight: bold; text-transform: uppercase;">Objetivo do Teste</span><br>
+            <span style="font-size: 0.85rem; color: #d1d5db;">{testes_opcoes[escolha_atual]['desc']}</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+    def preparar_envio():
+        st.session_state.texto_enviado = st.session_state.caixa_texto
+        st.session_state.caixa_texto = ""
 
     st.text_area("Sua mensagem:", key="caixa_texto", height=80, placeholder="Digite seu pedido aqui...")
 
-    if st.button("ENVIAR MENSAGEM ➜", type="primary", use_container_width=True):
-        msg = st.session_state.caixa_texto.strip()
+    if st.button("ENVIAR MENSAGEM ➜", type="primary", use_container_width=True, on_click=preparar_envio):
+        msg = st.session_state.texto_enviado.strip()
         if msg:
-            # 4. SALVA A MENSAGEM DO USUÁRIO
             st.session_state.history.append({"role": "user", "text": msg})
-            
-            # 5. ATUALIZA A TELA IMEDIATAMENTE (O pulo do gato para o vídeo!)
             chat_container.markdown(renderizar_chat(), unsafe_allow_html=True)
             
-            with st.spinner("🤖 IA digitando..."):
+            with st.spinner("Processando Inteligência Artificial..."):
                 try:
                     historico_ativo = st.session_state.history[st.session_state.context_start_idx:]
-                    conversa_texto = "".join([f"{'Cliente' if h['role'] == 'user' else 'Assistente'}: {h['text']}\n" for h in historico_ativo])
+                    conversa_texto = ""
+                    for h in historico_ativo:
+                        ator = "Cliente" if h["role"] == "user" else "Assistente"
+                        conversa_texto += f"{ator}: {h['text']}\n"
                     
-                    r = requests.post(WEBHOOK_URL, json={"message": msg, "history": conversa_texto}, timeout=45)
+                    payload = {"message": msg, "history": conversa_texto}
+                    r = requests.post(WEBHOOK_URL, json=payload, timeout=45)
                     
                     if r.status_code == 200:
                         import re
                         import json
                         
                         raw_text = r.text
+                        
                         try:
                             match = re.search(r'(\{.*\})', raw_text, re.DOTALL)
+                            
                             if match:
                                 clean_json = match.group(1)
                                 data = json.loads(clean_json)
@@ -234,12 +268,11 @@ with col1:
                         except Exception as e:
                             st.session_state.status = ("err", f"Erro crítico no Python: {str(e)}")
                     else:
-                        st.session_state.status = ("err", f"Erro: {r.status_code}")
-                except:
-                    st.session_state.status = ("err", "Falha na conexão.")
-            st.session_state.caixa_texto = ""
+                        st.session_state.status = ("err", f"Erro de comunicação: {r.status_code}")
+                except Exception as e:
+                    st.session_state.status = ("err", "Sistema Offline ou Falha na Conexão.")
+            
             st.rerun()
-
         else:
             st.warning("A mensagem não pode estar vazia.")
 
