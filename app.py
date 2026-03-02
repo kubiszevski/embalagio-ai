@@ -165,6 +165,9 @@ st.markdown(f"""
 
 with st.popover("ℹ️ Sobre este Projeto"):
     st.markdown("""
+    <div style="text-align: left; margin-bottom: 10px;">
+        <button onclick="window.parent.document.dispatchEvent(new MouseEvent('mousedown'))" style="background: transparent; border: 1px solid #888; color: #888; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer;">Fechar</button>
+    </div>
     <div style="color: #333333; font-family: sans-serif; font-size: 0.95rem;">
         <h3 style="color: #FF6A00; margin-top: 0; margin-bottom: 10px;">📦 Embalagio IA - Triagem & CRM</h3>
         <p style="margin-bottom: 10px;">O <b>Embalagio IA</b> é um assistente virtual autônomo focado na qualificação de leads. Utilizando LLMs (Llama 3.3 via Groq) integrados ao n8n e hospedado no Railway, ele simula o atendimento via WhatsApp.</p>
@@ -173,10 +176,6 @@ with st.popover("ℹ️ Sobre este Projeto"):
         <a href="https://github.com/kubiszevski/embalagio-atendimento/blob/main/README.md" target="_blank" style="color: #FF6A00; text-decoration: none; font-weight: normal; font-size: 0.75rem;">👉 Ler a Documentação no GitHub</a>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Qualquer botão dentro de um popover força o recarregamento e fecha a janela nativamente
-    if st.button("❌ Fechar", use_container_width=True):
-        pass
 
 st.write("")
 
@@ -195,7 +194,7 @@ with col1:
 
     msgs_html = ''
     if not st.session_state.history:
-        msgs_html = '<div class="chat-empty">Nenhuma mensagem ainda.<br/>Selecione um pedido ou digite abaixo ↓</div>'
+        msgs_html = '<div class="chat-empty">Nenhuma mensagem ainda.<br/>Selecione um cenário de teste ou digite abaixo ↓</div>'
     else:
         for m in st.session_state.history:
             if m["role"] == "user":
@@ -203,22 +202,31 @@ with col1:
             else:
                 msgs_html += f'<div class="msg-ai"><div><div class="bubble-label">🤖 Embalagio IA</div><div class="bubble bubble-ai"><p style="margin:0;">{m["text"]}</p></div></div></div>'
 
-    # Renderiza o chat
-    st.markdown(f'<div class="chat-panel"><div class="chat-messages">{msgs_html}</div></div>', unsafe_allow_html=True)
+    # A sua sacada de mestre: Âncora invisível no final das mensagens
+    msgs_html += '<div id="chat-bottom"></div>'
+
+    st.markdown(f"""
+    <div class="chat-panel">
+        <div class="chat-messages" id="chat-messages-box">
+            {msgs_html}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
-# Injeta JS dinâmico para garantir que o scroll da caixa de chat ocorra em 100% das vezes
+    # Executa o script mirando exatamente na âncora criada
     components.html(
         f"""
         <script>
-            const chatContainer = window.parent.document.querySelector('.chat-messages');
-            if (chatContainer) {{
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+            const doc = window.parent.document;
+            const bottom = doc.getElementById('chat-bottom');
+            if (bottom) {{
+                bottom.scrollIntoView({{ behavior: 'smooth', block: 'end' }});
             }}
         </script>
         """,
         height=0, width=0
     )
-    
+
     st.write("")
     
     # --- NOVO MENU DE TESTES COM SELECTBOX ---
