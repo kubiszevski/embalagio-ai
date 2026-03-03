@@ -4,8 +4,12 @@ import base64
 import re
 import json
 
-WEBHOOK_URL = "https://n8n-production-adc8.up.railway.app/webhook/embalagio-atendimento"
-SHEET_EMBED  = "https://docs.google.com/spreadsheets/d/1QcAuW2CIVvVv03asnwpj32AvT6rXKV9FXwLdSHXWhiw/edit?usp=sharing&rm=minimal"
+try:
+    WEBHOOK_URL = st.secrets["WEBHOOK_URL"]
+    SHEET_EMBED = st.secrets["SHEET_EMBED"]
+except KeyError:
+    st.error("error WEBHOOK_URL e SHEET_EMBED - .streamlit/secrets.toml")
+    st.stop()
 
 st.set_page_config(page_title="Embalagio CRM", page_icon="📦", layout="wide")
 
