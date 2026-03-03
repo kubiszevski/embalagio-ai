@@ -67,7 +67,7 @@ Para rodar a interface Streamlit na sua máquina e conectá-la a um backend n8n 
 
 1. **Clone o repositório:**
 ```bash
-git clone [https://github.com/kubiszevski/embalagio-atendimento.git](https://github.com/kubiszevski/embalagio-atendimento.git)
+git clone https://github.com/kubiszevski/embalagio-atendimento.git
 cd embalagio-atendimento
 
 ```
