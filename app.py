@@ -4,12 +4,11 @@ import base64
 import re
 import json
 
-# --- 1. CONFIGURAÇÃO DE SEGURANÇA (SECRETS) ---
 try:
     WEBHOOK_URL = st.secrets["WEBHOOK_URL"]
     SHEET_EMBED = st.secrets["SHEET_EMBED"]
 except KeyError:
-    st.error("Erro: WEBHOOK_URL e SHEET_EMBED não configurados nos Secrets do Streamlit Cloud.")
+    st.error("Error")
     st.stop()
 
 st.set_page_config(page_title="Embalagio CRM", page_icon="📦", layout="wide")
